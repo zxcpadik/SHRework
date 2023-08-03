@@ -24,11 +24,6 @@ function between(min, max) {
         Math.random() * (max - min) + min
     )
 }
-function sleep(ms) {
-    return new Promise((resolve) => {
-        setTimeout(resolve, ms);
-    });
-}
 function getPathSegments(path) {
     let sp = path.split('/');
     for (let i = 0; i < sp.length; i++) {
