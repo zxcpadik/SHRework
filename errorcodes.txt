@@ -1,0 +1,38 @@
+101: auth_username_null
+102: auth_password_null
+103: auth_password_invalid
+104: auth_username_invalid
+
+150: auth_successful
+
+------------DB------------
+
+301: db_rows_null
+302: db_error
+
+----------SYSTEM----------
+
+401: system_db_error
+402: system_secure_error
+
+-----------HTTP-----------
+
+501: http_query_username
+502: http_query_password
+502: http_query_destination
+
+---------TICKETS----------
+
+601: ticket_destination_null
+650: ticket_push_ok
+651: ticket_pull_ok
+652: ticket_flush_ok
+
+-----------USER-----------
+
+710: user_info_user_null
+750: user_info_ok
+
+-----------INFO-----------
+
+850: info_get_ok

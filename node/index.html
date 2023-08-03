@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Title</title>
+        <link rel="icon" type="image/x-icon" href="/favicon.png">
+        <link rel="stylesheet" href="index.css">
+        <script src="index.js"></script>
+    </head>
+    <body style="background: rgb(45, 45, 45); margin: 0px;">
+        <div class="general">
+            <div class="pobj_nav">
+                <div class="leftnav">
+                    <button class="navbtn" onclick="getElementById('obj_iframe').src='pages/general.html'; markActive(this);">Меню</button>
+                    <button class="navbtn" onclick="getElementById('obj_iframe').src='pages/devices.html'; markActive(this);">Дом</button>
+                    <button class="navbtn" onclick="getElementById('obj_iframe').src='pages/options.html'; markActive(this);">Настройки</button>
+                    <button class="navbtn" onclick="getElementById('obj_iframe').src='pages/profile.html'; markActive(this);">Аккаунт</button>
+                </div>
+            </div>
+            <div class="pobj_frame">
+                <div class="frame">
+                    <iframe id="obj_iframe">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

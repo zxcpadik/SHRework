@@ -1,0 +1,13 @@
+{
+  "messages": [
+    {"name": "auth_need", "value": "Необходима авторизация!"},
+    {"name": "input_login", "value": "Введите логин"},
+    {"name": "input_password", "value": "Введите пароль"},
+    {"name": "auth_process", "value": "Авторизация..."},
+    {"name": "auth_error", "value": "Ошибка авторизации!"},
+    {"name": "auth_success", "value": "Успешная авторизация!"},
+
+    {"name": "db_error", "value": "Ошибка ДБ!"},
+    {"name": "error", "value": "Ошибка!"}
+  ]
+}
