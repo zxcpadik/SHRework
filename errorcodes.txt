@@ -1,9 +1,26 @@
+100: auth_successful
 101: auth_username_null
 102: auth_password_null
 103: auth_password_invalid
 104: auth_username_invalid
+105: auth_password_badsymbols
+106: auth_username_badsymbols
 
-150: auth_successful
+110: exists_successful
+111: exists_username_null
+112: exists_username_badsymbols
+
+120: create_successful
+121: create_username_null
+122: create_password_null
+123: create_password_badsymbols
+124: create_username_badsymbols
+125: create_user_exists
+
+130: delete_successful
+131: delete_username_null
+132: delete_username_badsymbols
+133: delete_user_not_exists
 
 ------------DB------------
 

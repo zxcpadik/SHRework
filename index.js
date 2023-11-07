@@ -1,9 +1,11 @@
 process.env.DB_CONNECT = 'postgres://postgres:Abobus090@localhost:5432/'; 
 
 const express = require('express');
-const { DBv2 } = require('./dbv2.js');
+//const { DBv2 } = require('./dbv2.js');
 const secure = require('./secure.js');
 const os = require('os-utils');
+const crypto = require("crypto");
+const FileSystem = require('fs');
 
 String.prototype.format = function() {
     var args = arguments;
@@ -55,11 +57,11 @@ server.get('/api/v1/auth/', async (req, res) => {
     const username = req.query['username'];
     const password = req.query['password'];
     
-    if (username == null) {res.send({ok: false, code: 501}); return;}
-    if (password == null) {res.send({ok: false, code: 502}); return;}
+    if (username == null) {res.send({ok: false, code: 501}); return; }
+    if (password == null) {res.send({ok: false, code: 502}); return; }
 
     secure.Auth({username: username, password: password}, (err, resp) => {
-        if (err != null) {res.send({ok: false, code: 402}); return;}
+        if (err != null) {res.send({ok: false, code: 402}); return; }
 
         res.send(resp);
     });
@@ -71,8 +73,8 @@ server.get('/api/v1/ticket/push/', async (req, res) => {
     if (req.query['destination'] == null) {res.send({ok: false, code: 601}); return;}
 
     secure.Auth({username: req.query['username'], password: req.query['password']}, (err, resp) => {
-        if (err != null) {res.send({ok: false, code: 402}); return;}
-        if (resp.code != 150) {res.send(resp); return;}
+        if (err != null) { res.send({ok: false, code: 402}); return; }
+        if (!resp.ok) { res.send(resp); return; }
 
         if (tickets[req.query['destination']] == undefined) tickets[req.query['destination']] = [];
 
@@ -101,7 +103,7 @@ server.get('/api/v1/ticket/pull/', async (req, res) => {
 
     secure.Auth({username: req.query['username'], password: req.query['password']}, (err, resp) => {
         if (err != null) {res.send({ok: false, code: 402}); return;}
-        if (resp.code != 150) {res.send(resp); return;}
+        if (!resp.ok) { res.send(resp); return; }
 
         if (tickets[resp.id] == undefined) {res.send({ok: true, code: 651, count: 0}); return}
 
@@ -134,8 +136,8 @@ server.get('/api/v1/ticket/flush/', async (req, res) => {
     if (req.query['password'] == null) {res.send({ok: false, code: 502}); return;}
 
     secure.Auth({username: req.query['username'], password: req.query['password']}, (err, resp) => {
-        if (err != null) {res.send({ok: false, code: 402}); return;}
-        if (resp.code != 150) {res.send(resp); return;}
+        if (err != null) { res.send({ok: false, code: 402}); return; }
+        if (!resp.ok) { res.send(resp); return; }
 
         tickets[resp.id] = [];
         dynid[resp.id] = 0;
@@ -154,8 +156,8 @@ server.get('/api/v1/user/info/', async (req, res) => {
     if (userid == null) {res.send({ok: false, code: 710}); return;}
 
     secure.Auth({username: username, password: password}, (err, resp) => {
-        if (err != null) {res.send({ok: false, code: 402}); return;}
-        if (resp.code != 150) {res.send(resp); return;}
+        if (err != null) { res.send({ok: false, code: 402}); return; }
+        if (!resp.ok) { res.send(resp); return; }
 
         res.send({ok: true, code: 750, last: secure.GetLastAuth(userid)});
     });

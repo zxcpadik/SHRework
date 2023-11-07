@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>CodePen - Simple Authorization Form</title>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, user-scalable=no, shrink-to-fit=no"
+        />
+        <link rel="stylesheet" href="../css/auth.css" />
+    </head>
+    <body>
+        <!-- partial:index.partial.html -->
+        <div class="modal__background">
+            <div class="modal__window">
+                <form class="auth-form" name="form-auth" method="post">
+                    <label class="auth-form__label">
+                        <span class="auth-form__placeholder">username</span>
+                        <input
+                            class="auth-form__input input-username"
+                            type="text"
+                            name="username"
+                            autocomplete="off"
+                            required
+                        />
+                    </label>
+
+                    <label class="auth-form__label">
+                        <span class="auth-form__placeholder">password</span>
+                        <input
+                            class="auth-form__input input-password"
+                            type="password"
+                            name="password"
+                            autocomlete="off"
+                            required
+                        />
+                        <div class="auth-form__toggler">
+                            <i class="la la-eye auth-form__icon"></i>
+                            <input
+                                type="checkbox"
+                                class="auth-form__checkbox password-toggler"
+                            />
+                        </div>
+                    </label>
+
+                    <div class="auth-form__answer"></div>
+
+                    <input
+                        class="auth-form__submit"
+                        type="submit"
+                        value="Login"
+                    />
+
+                    <div class="auth-form__bottom">
+                        <span>Have no account?</span>
+                        <a href="#">Create new</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="hint"></div>
+        <!-- partial -->
+        <script src="../js/auth.js"></script>
+    </body>
+</html>
