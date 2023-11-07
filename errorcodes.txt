@@ -34,9 +34,9 @@
 
 -----------HTTP-----------
 
-501: http_query_username
-502: http_query_password
-502: http_query_destination
+501: DEPRECATERD_http_query_username
+502: DEPRECATERD_http_query_password
+503: DEPRECATERD_http_query_destination
 
 ---------TICKETS----------
 

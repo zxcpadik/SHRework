@@ -37,7 +37,7 @@ function ValidateUsername(user) {
 }
 
 function GenStr(len) {
-    return crypto.randomBytes(len/2).toString('hex');
+    return crypto.randomBytes(len / 2).toString('hex');
 }
 
 function GetLastAuth(id) {
@@ -57,7 +57,7 @@ function Auth(credits, callback) {
     try {
         db.Exsist('users', `username='${credits.username}'`, (err, res) => {
             if (err != null) { callback(null, { ok: false, code: 302 }); return; }  // DB Internal // [ERROR]
-            if (res.rows[0] == null) { callback(null, { ok: false, code: 301 }); return; }  // DB Rows Null // [ERROR]
+            if (res.rows == null || res.rows[0] == null) { callback(null, { ok: false, code: 301 }); return; }  // DB Rows Null // [ERROR]
             if (!res.rows[0].exists) { callback(null, { ok: false, code: 104 }); return; }  // User Not Found // [ERROR]
 
             db.Get('users', `username='${credits.username}'`, '*', (err, res) => {
@@ -70,8 +70,8 @@ function Auth(credits, callback) {
                 if (md5c !== hash) { callback(null, { ok: false, code: 103 }); return; }  // Incorrect Passwod // [ERROR]
 
                 const id = res.rows[0].id;  // Get User ID
-                db.Update('users', 'lastauth=now()', `username='${credits.username}'`, (err, res) => { if (err != null) console.log(err); } );  // Update lastauth in DB
-                lastAuth[id] = (Date.now()/1000).toFixed(0);  // Update lastauth in Server
+                db.Update('users', 'lastauth=now()', `username='${credits.username}'`, (err, res) => { if (err != null) console.log(err); });  // Update lastauth in DB
+                lastAuth[id] = (Date.now() / 1000).toFixed(0);  // Update lastauth in Server
                 callback(null, { ok: true, code: 100, id: id });  // Successful auth // [OK]
             });
         });
@@ -90,7 +90,7 @@ function Exsist(credits, callback) {
     try {
         db.Exsist('users', `username='${credits.username}'`, (err, res) => {
             if (err != null) { callback(null, { ok: false, code: 302 }); return; }  // DB Internal // [ERROR]
-            if (res.rows[0] == null) { callback(null, { ok: false, code: 301 }); return; }  // DB Rows Null // [ERROR]
+            if (res.rows == null || res.rows[0] == null) { callback(null, { ok: false, code: 301 }); return; }  // DB Rows Null // [ERROR]
 
             callback(null, { ok: true, code: 110, result: res.rows[0].exists });  // Successful Exists // [OK]
         });
@@ -111,7 +111,7 @@ function Create(credits, callback) {
     try {
         db.Exsist('users', `username='${credits.username}'`, (err, res) => {
             if (err != null) { callback(err, { ok: false, code: 302 }); return; }  // DB Internal // [ERROR]
-            if (res.rows[0] == null) { callback(null, { ok: false, code: 301 }); return; }  // DB Rows Null // [ERROR]
+            if (res.rows == null || res.rows[0] == null) { callback(null, { ok: false, code: 301 }); return; }  // DB Rows Null // [ERROR]
             if (res.rows[0].exists) { callback(null, { ok: false, code: 125 }); return; }  // User Already Exists // [ERROR]
 
             let salt1 = GenStr(16);  // Generate Salt1
@@ -140,7 +140,7 @@ function Delete(credits, callback) {
     try {
         db.Exsist('users', `username='${credits.username}'`, (err, res) => {
             if (err != null) { callback(null, { ok: false, code: 302 }); return; }  // DB Internal // [ERROR]
-            if (res.rows[0] == null) { callback(null, { ok: false, code: 301 }); return; }  // DB Rows Null // [ERROR]
+            if (res.rows == null || res.rows[0] == null) { callback(null, { ok: false, code: 301 }); return; }  // DB Rows Null // [ERROR]
             if (!res.rows[0].exists) { callback(null, { ok: false, code: 133 }); return; }  // User not exists // [ERROR]
 
             db.Delete('users', `username='${credits.username}'`, (err, res) => {
