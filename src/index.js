@@ -2,10 +2,8 @@ process.env.DB_CONNECT = 'postgres://postgres:Abobus090@localhost:5432/';
 
 const express = require('express');
 //const { DBv2 } = require('./dbv2.js');
-const secure = require('./secure.js');
+const secure = require('./sys/secure.js');
 const os = require('os-utils');
-const crypto = require("crypto");
-const FileSystem = require('fs');
 
 String.prototype.format = function () {
     var args = arguments;
@@ -144,6 +142,9 @@ server.get('/api/v1/ticket/flush/', async (req, res) => {
 });
 
 server.get('/api/v1/user/info/', async (req, res) => {
+    res.send({ ok: false, code: 500 });
+    return;
+
     const Username = req.query['username'];
     const Password = req.query['password'];
     const UserID = req.query['userid'];
