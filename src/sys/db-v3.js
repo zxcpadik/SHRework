@@ -9,13 +9,24 @@ const get = "SELECT {0} FROM {1} WHERE {2}";
 const geta = "SELECT {0} FROM {1}";
 const exs = "SELECT EXISTS(SELECT * FROM {0} WHERE {1})";
 
-class DBv2 {
-    constructor(connect) {
+const DecorateNoCallback = (obj, func) => {
+    return async (...args) => {
+        var retn = (await new Promise((resolve, reject) => {
+            func.call(obj, ...args, (err, res) => { resolve([err, res]) })
+        }));
+
+        return [...retn];
+    }
+}
+
+class DBv3 {
+    constructor(connect, callback) {
         this.client = new Client(connect);
-        this.client.connect();
+        this.client.connect(callback || (() => { }));
     }
 
-    CreateTable(name, params) {
+
+    CreateTable(name, params, callback) {
         this.client.query(create.format(name, params), callback);
     }
     Add(table, pool, values, callback) {
@@ -42,8 +53,18 @@ class DBv2 {
     Query(request, callback) {
         this.client.query(request, callback);
     }
+
+    ACreateTable = DecorateNoCallback(this, this.CreateTable);
+    AAdd = DecorateNoCallback(this, this.Add);
+    AUpdate = DecorateNoCallback(this, this.Update);
+    ADelete = DecorateNoCallback(this, this.Delete);
+    AGet = DecorateNoCallback(this, this.Get);
+    AGetRow = DecorateNoCallback(this, this.GetRow);
+    AGetAll = DecorateNoCallback(this, this.GetAll);
+    AExsist = DecorateNoCallback(this, this.Exsist);
+    AQuery = DecorateNoCallback(this, this.Query);
 }
 
 module.exports = {
-    DBv2: DBv2
+    DBv3
 };

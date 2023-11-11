@@ -1,4 +1,4 @@
-const { DBv2 } = require("../dbv2.js");
+const { DBv3 } = require("./db-v3");
 const md5 = require('md5');
 const crypto = require("crypto");
 
@@ -20,8 +20,7 @@ module.exports = {
 const goodsymbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789';
 
 if (!process.env.DB_CONNECT) console.error("[SECURE] DB connection string not set!\n[SECURE] Check .env!");
-const db = new DBv2(process.env.DB_CONNECT);
-
+const db = new DBv3(process.env.DB_CONNECT);
 
 function sha512(str) {
     return crypto.subtle.digest("SHA-512", new TextEncoder("utf-8").encode(str)).then(buf => {
@@ -179,7 +178,6 @@ function Delete(credits, callback) {
         callback(error, { ok: false, code: 401 });  // By System // [ERROR]
     }
 }
-
 
 // Do Update() method
 // Add 2FA

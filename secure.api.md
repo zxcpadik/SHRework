@@ -55,3 +55,17 @@
     res.ok      // true if no error
     res.code    // status code
 ```
+
+### Secure:GetLastAuth -- Usage example
+```JS
+    const secure = require('./secure.js');
+
+    secure.GetLastAuth({ username: 'username' }, (res, err) => {
+        if (err != null) console.log(err);
+        else console.log(res);
+    })
+
+    res.ok      // true if no error
+    res.code    // status code
+    res.result  // date of last auth if no error
+```

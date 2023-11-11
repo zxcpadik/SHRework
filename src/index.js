@@ -1,9 +1,10 @@
 require('dotenv').config();
 
 const express = require('express');
-//const { DBv2 } = require('./dbv2.js');
 const secure = require('./sys/secure.js');
 const os = require('os-utils');
+const { DBv3 } = require('./sys/db-v3.js');
+const db = new DBv3(process.env.DB_CONNECT);
 
 String.prototype.format = function () {
     var args = arguments;
