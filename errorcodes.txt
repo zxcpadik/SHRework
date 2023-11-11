@@ -22,6 +22,10 @@
 132: delete_username_badsymbols
 133: delete_user_not_exists
 
+140: lastauth_successful
+141: lastauth_username_null
+142: lastauth_user_not_found
+
 ------------DB------------
 
 301: db_rows_null

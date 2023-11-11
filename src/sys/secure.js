@@ -19,8 +19,9 @@ module.exports = {
 
 const goodsymbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789';
 
+if (!process.env.DB_CONNECT) console.error("[SECURE] DB connection string not set!\n[SECURE] Check .env!");
 const db = new DBv2(process.env.DB_CONNECT);
-var lastAuth = [];
+
 
 function sha512(str) {
     return crypto.subtle.digest("SHA-512", new TextEncoder("utf-8").encode(str)).then(buf => {
@@ -46,8 +47,26 @@ function GenStr(len) {
     return crypto.randomBytes(len / 2).toString('hex');
 }
 
-function GetLastAuth(id) {
-    return lastAuth[id] || -1;
+function GetLastAuth(credits, callback) {
+    if (callback == undefined) return;  // Callback Method Is Null // [ERROR]
+    if (credits.username == undefined) { return callback(null, { ok: false, code: 141 }); }  // Username Is Null // [ERROR]
+
+    try {
+        db.Exsist('users', `username='${credits.username}'`, (err, res) => {
+            if (err != null) { return callback(null, { ok: false, code: 302 }); }  // DB Internal // [ERROR]
+            if (res.rows == null || res.rows[0] == null || res.rows[0].exists == null) { return callback(null, { ok: false, code: 301 }); }  // DB Rows Null // [ERROR]
+            if (res.rows[0].exists == false) { return callback(null, { ok: false, code: 142 }); }  // User Not Found // [ERROR]
+
+            db.Get('users', `username='${credits.username}'`, 'lastauth', (err, res) => {
+                if (err != null) { return callback(null, { ok: false, code: 302 }); } // DB Internal // [ERROR]
+                if (res.rows == null || res.rows[0] == null || res.rows[0].lastauth == null) { return callback(null, { ok: false, code: 301 }); }  // DB Rows Null // [ERROR]
+
+                return callback(null, { ok: true, code: 140, result: res.rows[0].lastauth.toISOString() }); // Successful // [OK]
+            });
+        });
+    } catch (error) {
+        return callback(error, { ok: false, code: 401 });  // By System // [ERROR]
+    }
 }
 
 function Auth(credits, callback) {
@@ -77,7 +96,7 @@ function Auth(credits, callback) {
                     const id = res.rows[0].id;  // Get User ID
                     db.Update('users', 'lastauth=now()', `username='${credits.username}'`, (err, res) => { if (err != null) console.log(err); });  // Update lastauth in DB
                     lastAuth[id] = (Date.now() / 1000).toFixed(0);  // Update lastauth in Server
-                    callback(null, { ok: true, code: 100, id: id });  // Successful auth // [OK]
+                    return allback(null, { ok: true, code: 100, id: id });  // Successful auth // [OK]
                 }); 
             });
         });
