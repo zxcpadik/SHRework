@@ -1,4 +1,4 @@
-process.env.DB_CONNECT = 'postgres://postgres:Abobus090@localhost:5432/';
+require('dotenv').config();
 
 const express = require('express');
 //const { DBv2 } = require('./dbv2.js');
