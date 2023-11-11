@@ -69,16 +69,16 @@ function Auth(credits, callback) {
             db.Get('users', `username='${credits.username}'`, '*', (err, res) => {
                 if (err != null) { return callback(null, { ok: false, code: 302 }); } // DB Internal // [ERROR]
                 if (res.rows[0] == null) { return callback(null, { ok: false, code: 301 }); }  // DB Rows Null // [ERROR]
+                let [hash, salt1, salt2] = res.rows[0].password.split(':');
 
-                let [hash, salt1, salt2] = res.rows[0].password.split(':');  // Split into Hash and Salt
-                let hashc = sha512(salt1 + credits.password + salt2);  // Make SHA512 Hash From Password
-
-                if (hashc !== hash) { return callback(null, { ok: false, code: 103 }); }  // Incorrect Passwod // [ERROR]
-
-                const id = res.rows[0].id;  // Get User ID
-                db.Update('users', 'lastauth=now()', `username='${credits.username}'`, (err, res) => { if (err != null) console.log(err); });  // Update lastauth in DB
-                lastAuth[id] = (Date.now() / 1000).toFixed(0);  // Update lastauth in Server
-                callback(null, { ok: true, code: 100, id: id });  // Successful auth // [OK]
+                sha512(salt1 + credits.password + salt2).then((hashc) => {  // Make SHA512 Hash From Password
+                    if (hashc !== hash) { return callback(null, { ok: false, code: 103 }); }  // Incorrect Passwod // [ERROR]
+    
+                    const id = res.rows[0].id;  // Get User ID
+                    db.Update('users', 'lastauth=now()', `username='${credits.username}'`, (err, res) => { if (err != null) console.log(err); });  // Update lastauth in DB
+                    lastAuth[id] = (Date.now() / 1000).toFixed(0);  // Update lastauth in Server
+                    callback(null, { ok: true, code: 100, id: id });  // Successful auth // [OK]
+                }); 
             });
         });
     } catch (error) {
@@ -122,13 +122,13 @@ function Create(credits, callback) {
 
             let salt1 = GenStr(32);  // Generate Salt1
             let salt2 = GenStr(32);  // Generate Salt2
-            let hashc = sha512(salt1 + credits.password + salt2);  // Make SHA512 hash
-
-            db.Add('users', 'username, password', `'${credits.username}', '${hashc}:${salt1}:${salt2}'`, (err, res) => {
-                if (err != null) { return callback(err, { ok: false, code: 302 }); }  // DB Internal // [ERROR]
-                //if (res.rows[0] == null) { return callback(null, { ok: false, code: 301 }); }  // DB Rows Null // [ERROR] -- Not Used
-
-                return callback(null, { ok: true, code: 120 });  // User Created // [OK]
+            sha512(salt1 + credits.password + salt2).then((hashc) => {  // Make SHA512 hash
+                db.Add('users', 'username, password', `'${credits.username}', '${hashc}:${salt1}:${salt2}'`, (err, res) => {
+                    if (err != null) { return callback(err, { ok: false, code: 302 }); }  // DB Internal // [ERROR]
+                    //if (res.rows[0] == null) { return callback(null, { ok: false, code: 301 }); }  // DB Rows Null // [ERROR] -- Not Used
+    
+                    return callback(null, { ok: true, code: 120 });  // User Created // [OK]
+                });
             });
         });
     } catch (error) {
