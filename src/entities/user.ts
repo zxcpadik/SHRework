@@ -28,6 +28,4 @@ export class User {
 
       this.Password = `${hash}:${salt1}:${salt2}`;
     }
-
-
 }
