@@ -1,4 +1,9 @@
-src/node_modules/
-src/node/
+src/node_modules
+src/node
 src/package-lock.json
+node_modules/
+package-lock.json
 .vscode/
+.backup/
+build/
+node_modules
