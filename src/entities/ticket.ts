@@ -3,19 +3,19 @@ import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 @Entity()
 export class Ticket {
     @PrimaryGeneratedColumn()
-    GlobalID: number = 0;
+    GlobalID?: number;
 
     @Column()
-    SourceID: number = 0;
+    SourceID: number = -1;
 
     @Column()
-    DestinationID: number = 0;
+    DestinationID: number = -1;
 
     @Column()
-    TicketID: number = 0;
+    TicketID?: number;
 
     @Column()
-    ResponseID: number = 0;
+    ResponseID: number = -1;
 
     @Column({ type: 'text' })
     Data: string = '';

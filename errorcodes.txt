@@ -1,30 +1,29 @@
 100: auth_successful
-101: auth_username_null
-102: auth_password_null
-103: auth_password_invalid
-104: auth_username_invalid
-105: auth_password_badsymbols
-106: auth_username_badsymbols
+101: auth_invalid
+102: auth_username
+103: auth_password
 
-110: exists_successful
-111: exists_username_null
-112: exists_username_badsymbols
+110: DEPRECATERD_exists_successful
+111: DEPRECATERD_exists_username_null
+112: DEPRECATERD_exists_username_badsymbols
 
 120: create_successful
-121: create_username_null
-122: create_password_null
-123: create_password_badsymbols
-124: create_username_badsymbols
-125: create_user_exists
+121: create_invalid
+122: create_exists
 
-130: delete_successful
-131: delete_username_null
-132: delete_username_badsymbols
-133: delete_user_not_exists
+130: DEPRECATERD_delete_successful
+131: DEPRECATERD_delete_username_null
+132: DEPRECATERD_delete_username_badsymbols
+133: DEPRECATERD_delete_user_not_exists
 
 140: lastauth_successful
 141: lastauth_username_null
 142: lastauth_user_not_found
+
+150: update_successful
+151: update_invalid
+152: update_password
+153: update_notfound
 
 ------------DB------------
 
@@ -35,6 +34,7 @@
 
 401: system_db_error
 402: system_secure_error
+499: not_avalibale
 500: deprecation_error
 
 -----------HTTP-----------
@@ -45,9 +45,11 @@
 
 ---------TICKETS----------
 
-601: ticket_destination_null
-650: ticket_push_ok
-651: ticket_pull_ok
+600: push_ok
+601: push_invalid
+
+610: pull_ok
+
 652: ticket_flush_ok
 
 -----------USER-----------

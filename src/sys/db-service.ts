@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { Ticket } from "../entities/ticket";
 import { User } from "../entities/user";
+import { LastTicket } from "../entities/lastticket";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -10,8 +11,8 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   synchronize: true,
-  logging: true,
-  entities: [ Ticket, User ],
+  logging: false,
+  entities: [ Ticket, User, LastTicket ],
   subscribers: [],
   migrations: [],
 })
@@ -21,3 +22,7 @@ AppDataSource.initialize().then(() => {
 }).catch((err) => {
   console.error("[DB] Failed!", err)
 });
+
+export const UserRepo = AppDataSource.getRepository(User);
+export const TicketRepo = AppDataSource.getRepository(Ticket);
+export const LastTicketRepo = AppDataSource.getRepository(LastTicket);

@@ -5,7 +5,7 @@ import RSTR from "randomstring"
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
-    UserID: number = 0;
+    ID?: number;
 
     @Column()
     Username: string = '';
@@ -16,16 +16,19 @@ export class User {
     @Column({ type: 'timestamptz' })
     LastAuth: Date = new Date();
 
-    IsPasswordMach(Password: string): boolean {
+    IsPasswordMach(password?: string): boolean {
+      if (!password) return false;
+
       let blocks = this.Password.split(':')
-      let hash = SHA256(Password);
+      let hash = SHA256([blocks[1], password, blocks[2]].join());
+
       return hash === blocks[0];
     }
-    UpdatePassword(Password: string) {
+    UpdatePassword(password: string) {
       let salt1 = RSTR.generate(16);
       let salt2 = RSTR.generate(16);
-      let hash = SHA256(salt1 + Password + salt2)
+      let hash = SHA256([salt1, password, salt2].join())
 
-      this.Password = `${hash}:${salt1}:${salt2}`;
+      this.Password = [hash, salt1, salt2].join(':');
     }
 }
