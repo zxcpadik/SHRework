@@ -50,7 +50,9 @@
 
 610: pull_ok
 
-652: ticket_flush_ok
+620: flush_ok
+
+630: last_ok
 
 -----------USER-----------
 

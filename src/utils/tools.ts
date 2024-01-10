@@ -9,9 +9,9 @@ class ToolsEx {
     });
   };
 
-  PadLeft(orig: number, base?: number, chr?: string): number {
+  PadLeft(orig: any, base?: any, chr?: any): number {
     var len = (String(base || 10).length - String(orig).length) + 1;
-    return len > 0 ? Number.parseFloat(new Array(len).join(chr || '0')) + orig : orig;
+    return len > 0 ? new Array(len).join(chr || '0') + orig : orig;
   }
 
   Clamp(num: number, min: number, max: number): number {

@@ -48,6 +48,19 @@ class TicketServiceBase {
 
     return lastTicket?.TicketID || 0;
   }
+
+  async Flush(UserID: number): Promise<Number> {
+    let lastTicket = await TicketRepo.delete({
+      DestinationID: UserID
+    });
+    await LastTicketRepo.update({
+      UserID: UserID
+    }, {
+      TicketID: 0
+    });
+
+    return lastTicket.affected || 0;
+  }
 }
 
 

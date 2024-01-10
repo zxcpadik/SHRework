@@ -89,25 +89,28 @@ server.get('/api/v1/pull/', async (req, res) => {
     } else return res.send(result);
 });
 
-server.get('/api/v1/ticket/flush/', async (req, res) => {
-    res.send({ ok: false, code: 499 });
-    return;
+server.get('/api/v1/flush/', async (req, res) => {
+    const username = req.query['username'] as string | undefined;
+    const password = req.query['password'] as string | undefined;
 
-    /*
-    const Username = req.query['username'];
-    const Password = req.query['password'];
-
-    secure.Auth({ username: Username, password: Password }, (err, resp) => {
-        if (err != null) { res.send({ ok: false, code: 402 }); return; }
-        if (!resp.ok) { res.send(resp); return; }
-
-        tickets[resp.id] = [];
-        dynid[resp.id] = 0;
-
-        res.send({ ok: true, code: 652 });
-    });
-    */
+    let result = await AuthService.Auth(new Credentials(username, password));
+    if (result.ok) {
+        let tres = await TicketService.Flush(result.user?.ID || -1);
+        return res.send({ok: true, status: 620, count: tres});
+    } else return res.send(result);
 });
+
+server.get('/api/v1/last/', async (req, res) => {
+    const username = req.query['username'] as string | undefined;
+    const password = req.query['password'] as string | undefined;
+
+    let result = await AuthService.Auth(new Credentials(username, password));
+    if (result.ok) {
+        let tres = await TicketService.GetLast(result.user?.ID || -1);
+        return res.send({ok: true, status: 630, last: tres});
+    } else return res.send(result);
+});
+
 
 server.get('/api/v1/user/info/', async (req, res) => {
     res.send({ ok: false, code: 500 });
