@@ -1,8 +1,6 @@
-import { AppDataSource, UserRepo } from "./db-service";
+import { UserRepo } from "./db-service";
 import { User } from "../entities/user";
 import { AuthUtil } from "../utils/auth-utils";
-import { Repository } from "typeorm";
-
 
 class AuthServiceBase {
   public async Auth(credits: Credentials) : Promise<SecureResult> {

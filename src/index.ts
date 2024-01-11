@@ -122,6 +122,7 @@ server.get('/api/v1/last/', async (req, res) => {
     } else return res.send(result);
 });
 
+
 server.get('/api/v1/', async (req, res) => {
     return res.send({ok: true, status: 800, version: 1});
 });
