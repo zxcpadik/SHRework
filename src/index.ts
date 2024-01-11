@@ -107,7 +107,7 @@ server.get('/api/v1/last/', async (req, res) => {
     let result = await AuthService.Auth(new Credentials(username, password));
     if (result.ok) {
         let tres = await TicketService.GetLast(result.user?.ID || -1);
-        return res.send({ok: true, status: 630, last: tres});
+        return res.send({ok: true, status: 630, count: tres});
     } else return res.send(result);
 });
 
