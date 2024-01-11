@@ -39,6 +39,17 @@ server.get('/api/v2/update/', async (req, res) => {
     } else return res.send(result);
 });
 
+server.get('/api/v2/delete/', async (req, res) => {
+    const username = req.query['username'] as string | undefined;
+    const password = req.query['password'] as string | undefined;
+
+    let result = await AuthService.Auth(new Credentials(username, password));
+    if (!result.ok) return res.send(result);
+    
+    let deleteresult = await AuthService.Delete(new Credentials(username, password));
+    return res.send(deleteresult);
+});
+
 
 server.get('/api/v1/push/', async (req, res) => {
     const Username = req.query['username'] as string | undefined;
@@ -109,6 +120,14 @@ server.get('/api/v1/last/', async (req, res) => {
         let tres = await TicketService.GetLast(result.user?.ID || -1);
         return res.send({ok: true, status: 630, count: tres});
     } else return res.send(result);
+});
+
+server.get('/api/v1/', async (req, res) => {
+    return res.send({ok: true, status: 800, version: 1});
+});
+
+server.get('/api/v2/', async (req, res) => {
+    return res.send({ok: true, status: 801, version: 1});
 });
 
 

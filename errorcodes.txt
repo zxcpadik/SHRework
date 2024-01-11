@@ -11,10 +11,8 @@
 121: create_invalid
 122: create_exists
 
-130: DEPRECATERD_delete_successful
-131: DEPRECATERD_delete_username_null
-132: DEPRECATERD_delete_username_badsymbols
-133: DEPRECATERD_delete_user_not_exists
+130: delete_successful
+131: delete_invalid
 
 140: lastauth_successful
 141: lastauth_username_null
@@ -61,4 +59,6 @@
 
 -----------INFO-----------
 
+800: api_v1_ok
+801: api_v2_ok
 850: info_get_ok

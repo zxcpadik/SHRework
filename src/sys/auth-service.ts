@@ -51,6 +51,16 @@ class AuthServiceBase {
     let usr = await UserRepo.save(User);
     return new SecureResult(true, 150, usr);
   }
+
+  public async Delete(credits: Credentials): Promise<SecureResult> {
+    if (!AuthUtil.ValidateUsername(credits.Username)) return new SecureResult(false, 131);
+
+    let res = await UserRepo.delete({
+      Username: credits.Username,
+    });
+
+    return new SecureResult((res.affected || 0) > 1, (res.affected || 0) > 1 ? 130 : 131, undefined);
+  }
 } 
 
 
