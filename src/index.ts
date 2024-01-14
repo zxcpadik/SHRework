@@ -7,6 +7,8 @@ import { Tools } from "./utils/tools";
 import { TicketService } from "./sys/ticket-service";
 import { Ticket } from "./entities/ticket";
 
+const API_V1_VER = 1;
+const API_V2_VER = 1;
 
 const server = Express();
 
@@ -124,11 +126,11 @@ server.get('/api/v1/last/', async (req, res) => {
 
 
 server.get('/api/v1/', async (req, res) => {
-    return res.send({ok: true, status: 800, version: 1});
+    return res.send({ok: true, status: 800, version: API_V1_VER});
 });
 
 server.get('/api/v2/', async (req, res) => {
-    return res.send({ok: true, status: 801, version: 1});
+    return res.send({ok: true, status: 801, version: API_V2_VER});
 });
 
 
