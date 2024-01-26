@@ -10,7 +10,18 @@ import { Ticket } from "./entities/ticket";
 const API_V1_VER = 1;
 const API_V2_VER = 1;
 
+const fs = require('fs');
+const http = require('http');
+const https = require('https');
+
 const server = Express();
+
+if (process.env.HTTPS_REDIRECT) {
+    server.use(async (req, res, next) => {
+        if (!req.secure) res.redirect('https://' + req.get('host') + req.originalUrl);
+        else next();
+    });
+}
 
 server.get('/api/v2/auth/', async (req, res) => {
     const Username = req.query['username'] as string | undefined;
@@ -183,6 +194,24 @@ server.get('*', (req, res) => {
     else res.redirect('/index.html');
 });
 
-server.listen(80, () => {
-    console.log(`[HTTP] Server listening on port 80`)
-});
+var httpServer: any;
+var httpsServer: any;
+
+if (process.env.HTTP_ENABLED) {
+    httpServer = http.createServer(server);
+
+    httpServer.listen(8080, () => {
+        console.log(`[HTTP] Server listening on port 8080`)
+    });
+} else console.log(`[HTTP] Server disabled`);
+
+if (process.env.HTTPS_ENABLED) {
+    var privateKey  = fs.readFileSync('ssl/' + process.env.HTTPS_PKEY, 'utf8');
+    var certificate = fs.readFileSync('ssl/' + process.env.HTTPS_CERT, 'utf8');
+    var credentials = {key: privateKey, cert: certificate};
+    httpsServer = https.createServer(credentials, server);
+
+    httpsServer.listen(443, () => {
+        console.log(`[HTTPS] Server listening on port 443`)
+    });
+} else console.log(`[HTTPS] Server disabled`);

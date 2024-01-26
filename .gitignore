@@ -7,3 +7,7 @@ package-lock.json
 .backup/
 build/
 node_modules
+ssl/sh-rework.ru
+.env
+ssl/certificate.crt
+ssl/private.key
