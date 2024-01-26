@@ -57,7 +57,7 @@ class AuthServiceBase {
       Username: credits.Username,
     });
 
-    return new SecureResult((res.affected || 0) > 1, (res.affected || 0) > 1 ? 130 : 131, undefined);
+    return new SecureResult((res.affected || 0) > 1, (res.affected || 0) > 0 ? 130 : 131, undefined);
   }
 } 
 
