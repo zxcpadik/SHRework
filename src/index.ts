@@ -1,4 +1,5 @@
-require('dotenv').config();
+import { config } from 'dotenv';
+config();
 
 import Express from "express";
 import { AuthService, Credentials } from "./sys/auth-service";
@@ -10,14 +11,15 @@ import { Ticket } from "./entities/ticket";
 const API_V1_VER = 1;
 const API_V2_VER = 1;
 
-const fs = require('fs');
-const http = require('http');
-const https = require('https');
+import fs from 'fs';
+import http from 'http';
+import https from 'https';
 
 const server = Express();
 
-if (process.env.HTTPS_REDIRECT) {
-    server.use(async (req, res, next) => {
+if (process.env.HTTPS_REDIRECT === 'true') {
+    console.log(`[HTTPS] Redirect enabled`)
+    server.use((req, res, next) => {
         if (!req.secure) res.redirect('https://' + req.get('host') + req.originalUrl);
         else next();
     });
@@ -197,7 +199,7 @@ server.get('*', (req, res) => {
 var httpServer: any;
 var httpsServer: any;
 
-if (process.env.HTTP_ENABLED) {
+if (process.env.HTTP_ENABLED === 'true') {
     httpServer = http.createServer(server);
 
     httpServer.listen(8080, () => {
@@ -205,7 +207,7 @@ if (process.env.HTTP_ENABLED) {
     });
 } else console.log(`[HTTP] Server disabled`);
 
-if (process.env.HTTPS_ENABLED) {
+if (process.env.HTTPS_ENABLED === 'true') {
     var privateKey  = fs.readFileSync('ssl/' + process.env.HTTPS_PKEY, 'utf8');
     var certificate = fs.readFileSync('ssl/' + process.env.HTTPS_CERT, 'utf8');
     var credentials = {key: privateKey, cert: certificate};
