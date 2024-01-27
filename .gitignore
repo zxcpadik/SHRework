@@ -11,3 +11,4 @@ ssl/sh-rework.ru
 .env
 ssl/certificate.crt
 ssl/private.key
+ssl/certificate_ca.crt

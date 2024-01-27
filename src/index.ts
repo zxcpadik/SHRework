@@ -202,15 +202,16 @@ var httpsServer: any;
 if (process.env.HTTP_ENABLED === 'true') {
     httpServer = http.createServer(server);
 
-    httpServer.listen(8080, () => {
-        console.log(`[HTTP] Server listening on port 8080`)
+    httpServer.listen(80, () => {
+        console.log(`[HTTP] Server listening on port 80`)
     });
 } else console.log(`[HTTP] Server disabled`);
 
 if (process.env.HTTPS_ENABLED === 'true') {
-    var privateKey  = fs.readFileSync('ssl/' + process.env.HTTPS_PKEY, 'utf8');
-    var certificate = fs.readFileSync('ssl/' + process.env.HTTPS_CERT, 'utf8');
-    var credentials = {key: privateKey, cert: certificate};
+    var pkey  = fs.readFileSync('ssl/' + process.env.HTTPS_PKEY, 'utf8');
+    var cert = fs.readFileSync('ssl/' + process.env.HTTPS_CERT, 'utf8');
+    var chain = fs.readFileSync('ssl/' + process.env.HTTPS_CA, 'utf8');
+    var credentials = {key: pkey, cert: cert, ca: chain};
     httpsServer = https.createServer(credentials, server);
 
     httpsServer.listen(443, () => {

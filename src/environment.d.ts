@@ -11,6 +11,7 @@ declare global {
       HTTPS_REDIRECT: string;
       HTTPS_CERT: string;
       HTTPS_PKEY: string;
+      HTTPS_CA: string;
       HTTP_ENABLED: string;
     }
   }
