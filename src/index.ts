@@ -7,15 +7,30 @@ import OS from "os-utils";
 import { Tools } from "./utils/tools";
 import { TicketService } from "./sys/ticket-service";
 import { Ticket } from "./entities/ticket";
+import formData from "express-form-data";
 
 const API_V1_VER = 1;
 const API_V2_VER = 1;
+const API_V3_VER = 1;
 
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
 
+const options = {
+    uploadDir: 'tmp',
+    autoClean: true
+};
+
 const server = Express();
+
+server.use(formData.parse(options));
+server.use(formData.format());
+server.use(formData.stream());
+server.use(formData.union());
+
+server.use(Express.json())
+server.use(Express.urlencoded({extended: true}))
 
 if (process.env.HTTPS_REDIRECT === 'true') {
     console.log(`[HTTPS] Redirect enabled`)
@@ -144,6 +159,10 @@ server.get('/api/v1/', async (req, res) => {
 
 server.get('/api/v2/', async (req, res) => {
     return res.send({ok: true, status: 801, version: API_V2_VER});
+});
+
+server.post('/api/v3/', (req, res) => {
+    return res.json({ok: true, status: 802, version: API_V3_VER});
 });
 
 

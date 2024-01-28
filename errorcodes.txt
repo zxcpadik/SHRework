@@ -61,4 +61,5 @@
 
 800: api_v1_ok
 801: api_v2_ok
+802: api_v3_ok
 850: info_get_ok

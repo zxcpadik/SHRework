@@ -12,3 +12,4 @@ ssl/sh-rework.ru
 ssl/certificate.crt
 ssl/private.key
 ssl/certificate_ca.crt
+tmp
