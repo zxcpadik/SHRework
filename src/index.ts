@@ -42,7 +42,7 @@ server.use((req, res, next) => {
   );
 
   next();
-})
+});
 
 if (process.env.HTTPS_REDIRECT === "true") {
   console.log(`[HTTPS] Redirect enabled`);

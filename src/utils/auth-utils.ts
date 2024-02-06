@@ -1,10 +1,9 @@
-
-
-const goodsymbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789';
+const goodsymbols =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789";
 class AuthUtils {
   public ValidateString(str: string): boolean {
     for (let i = 0; i < str.length; i++) {
-        if (!goodsymbols.includes(str[i])) return false;
+      if (!goodsymbols.includes(str[i])) return false;
     }
     return true;
   }

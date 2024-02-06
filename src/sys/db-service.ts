@@ -12,16 +12,18 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: true,
   logging: false,
-  entities: [ Ticket, User, LastTicket ],
+  entities: [Ticket, User, LastTicket],
   subscribers: [],
   migrations: [],
-})
-
-AppDataSource.initialize().then(() => {
-  console.log("[DB] Connected!")
-}).catch((err) => {
-  console.error("[DB] Failed!", err)
 });
+
+AppDataSource.initialize()
+  .then(() => {
+    console.log("[DB] Connected!");
+  })
+  .catch((err) => {
+    console.error("[DB] Failed!", err);
+  });
 
 export const UserRepo = AppDataSource.getRepository(User);
 export const TicketRepo = AppDataSource.getRepository(Ticket);
