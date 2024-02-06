@@ -6,15 +6,15 @@ import { TicketService } from "./ticket-service";
 
 export module APIv3Host {
   export function Load(app: Express) {
-    app.post("/api/v3/auth/", PostSecureAuth);
-    app.post("/api/v3/create/", PostSecureCreate);
-    app.post("/api/v3/update/", PostSecureUpdate);
-    app.post("/api/v3/delete/", PostSecureDelete);
-    app.post("/api/v3/push/", PostTicketPush);
-    app.post("/api/v3/pull/", PostTicketPull);
-    app.post("/api/v3/flush/", PostTicketFlush);
-    app.post("/api/v3/last/", PostTicketLast);
-    app.post("/api/v3/", PostAPIv3);
+    app.post("/api/v3/auth", PostSecureAuth);
+    app.post("/api/v3/create", PostSecureCreate);
+    app.post("/api/v3/update", PostSecureUpdate);
+    app.post("/api/v3/delete", PostSecureDelete);
+    app.post("/api/v3/push", PostTicketPush);
+    app.post("/api/v3/pull", PostTicketPull);
+    app.post("/api/v3/flush", PostTicketFlush);
+    app.post("/api/v3/last", PostTicketLast);
+    app.post("/api/v3", PostAPIv3);
   }
   export const API_V3_VER = 1;
 
