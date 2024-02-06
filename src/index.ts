@@ -12,11 +12,11 @@ import path from "path";
 
 const API_V1_VER = 1;
 const API_V2_VER = 1;
-const API_V3_VER = 1;
 
 import fs from "fs";
 import http from "http";
 import https from "https";
+import { APIv3Host } from "./sys/post-api";
 
 const options = {
   uploadDir: "tmp",
@@ -24,7 +24,7 @@ const options = {
 };
 
 const server = Express();
-server.use(Express.static(path.join(__dirname, '/web/')));
+server.use(Express.static(path.join(__dirname, "/web/")));
 
 server.use(formData.parse(options));
 server.use(formData.format());
@@ -34,6 +34,16 @@ server.use(formData.union());
 server.use(Express.json());
 server.use(Express.urlencoded({ extended: true }));
 
+server.use((req, res, next) => {
+  if (typeof req.body != typeof Object) return next();
+
+  req.body = Object.fromEntries(
+    Object.entries(req.body).map(([k, v]) => [k.toLowerCase(), v])
+  );
+
+  next();
+})
+
 if (process.env.HTTPS_REDIRECT === "true") {
   console.log(`[HTTPS] Redirect enabled`);
   server.use((req, res, next) => {
@@ -42,6 +52,8 @@ if (process.env.HTTPS_REDIRECT === "true") {
     else next();
   });
 }
+
+APIv3Host.Load(server);
 
 server.get("/api/v2/auth/", async (req, res) => {
   const Username = req.query["username"] as string | undefined;
@@ -178,10 +190,6 @@ server.get("/api/v2/", async (req, res) => {
   return res.send({ ok: true, status: 801, version: API_V2_VER });
 });
 
-server.post("/api/v3/", (req, res) => {
-  return res.json({ ok: true, status: 802, version: API_V3_VER });
-});
-
 server.get("/api/v1/user/info/", async (req, res) => {
   res.send({ ok: false, code: 500 });
   return;
@@ -239,7 +247,7 @@ setInterval(() => {
 }, 60000);
 
 server.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, '/web/', req.path));
+  res.sendFile(path.join(__dirname, "/web/", req.path));
 
   //const path = req.path;
   //const fpath = __dirname + "\\node" + Tools.MakePath(path);
