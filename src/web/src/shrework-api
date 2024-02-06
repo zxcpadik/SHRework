@@ -1,0 +1,14 @@
+import React from "react";
+
+export module APIv3 {
+  function APIHost(): string {
+    return "https://" + window.location.host + "/api/";
+  }
+
+  export function f() {
+    
+  }
+
+
+  
+}
