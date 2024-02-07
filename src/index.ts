@@ -247,7 +247,7 @@ setInterval(() => {
 }, 60000);
 
 server.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "/web/", req.path));
+  res.sendFile(path.join(__dirname, "/web/index.html"));
 
   //const path = req.path;
   //const fpath = __dirname + "\\node" + Tools.MakePath(path);

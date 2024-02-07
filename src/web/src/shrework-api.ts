@@ -16,7 +16,7 @@ export module SHReworkAPI {
       })
         .then((response) => response.json())
         .then((data) => resolve(data))
-        .catch((error) => reject(error));
+        .catch((error) => resolve({ok: false, status: -1}));
     });
   }
 
@@ -33,7 +33,7 @@ export module SHReworkAPI {
       })
         .then((response) => response.json())
         .then((data) => resolve(data))
-        .catch((error) => reject(error));
+        .catch((error) => resolve({ok: false, status: -1}));
     });
   }
 
@@ -51,7 +51,7 @@ export module SHReworkAPI {
       })
         .then((response) => response.json())
         .then((data) => resolve(data))
-        .catch((error) => reject(error));
+        .catch((error) => resolve({ok: false, status: -1}));
     });
   }
 
@@ -68,7 +68,7 @@ export module SHReworkAPI {
       })
         .then((response) => response.json())
         .then((data) => resolve(data))
-        .catch((error) => reject(error));
+        .catch((error) => resolve({ok: false, status: -1}));
     });
   }
 
@@ -88,7 +88,7 @@ export module SHReworkAPI {
       })
         .then((response) => response.json())
         .then((data) => resolve(data))
-        .catch((error) => reject(error));
+        .catch((error) => resolve({ok: false, status: -1}));
     });
   }
 
@@ -107,7 +107,7 @@ export module SHReworkAPI {
       })
         .then((response) => response.json())
         .then((data) => resolve(data))
-        .catch((error) => reject(error));
+        .catch((error) => resolve({ok: false, status: -1}));
     });
   }
 
@@ -124,7 +124,7 @@ export module SHReworkAPI {
       })
         .then((response) => response.json())
         .then((data) => resolve(data))
-        .catch((error) => reject(error));
+        .catch((error) => resolve({ok: false, status: -1}));
     });
   }
 
@@ -141,7 +141,7 @@ export module SHReworkAPI {
       })
         .then((response) => response.json())
         .then((data) => resolve(data))
-        .catch((error) => reject(error));
+        .catch((error) => resolve({ok: false, status: -1}));
     });
   }
 
@@ -154,7 +154,7 @@ export module SHReworkAPI {
       })
         .then((response) => response.json())
         .then((data) => resolve(data))
-        .catch((error) => reject(error));
+        .catch((error) => resolve({ok: false, status: -1}));
     });
   }
 }
@@ -170,27 +170,27 @@ export class Credentials {
 }
 
 export class SecureResult {
-  public ok: boolean;
-  public status: number;
+  public ok: boolean = false;
+  public status: number = -1;
   public user?: User;
 }
 
 export class TicketResult {
-  public ok: boolean;
-  public status: number;
+  public ok: boolean = false;
+  public status: number = -1;
   public tickets?: Ticket[];
 }
 
 export class TicketServiceResult {
-  public ok: boolean;
-  public status: number;
-  public count: number;
+  public ok: boolean = false;
+  public status: number = -1;
+  public count?: number;
 }
 
 export class Ticket {
   public GlobalID?: number;
   public SourceID?: number;
-  public DestinationID: number;
+  public DestinationID: number = -1;
   public TicketID?: number;
   public ResponseID?: number;
   public Data?: string;
@@ -198,14 +198,14 @@ export class Ticket {
 }
 
 export class User {
-  ID: number;
-  Username: string;
-  Password: string;
+  ID: number = -1;
+  Username: string = "";
+  Password: string = "";
   LastAuth?: Date;
 }
 
 export class ApiVersionResult {
-  public ok: boolean;
-  public status: number;
-  public version: number;
+  public ok: boolean = false;
+  public status: number = -1;
+  public version?: number;
 }

@@ -1,21 +1,14 @@
 import React, { createContext, useState } from 'react';
 
-export const authContext = createContext({});
+export const AuthContext = createContext({});
 
 const AuthProvider = ({ children }: any) => {
-  const [auth, setAuth] = useState<object>({ loading: true, data: null });
-// we will use loading later
-
-
-  const setAuthData = (data: any) => {
-    setAuth({data: data});
-  };
- // a function that will help us to add the user data in the auth;
+  const [auth, setAuth] = useState<Credential>();
 
   return (
-    <authContext.Provider value={{ auth, setAuthData }}>
+    <AuthContext.Provider value={{ auth, setAuth }}>
       {children}
-    </authContext.Provider>
+    </AuthContext.Provider>
   );
 };
 
