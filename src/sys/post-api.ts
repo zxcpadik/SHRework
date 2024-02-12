@@ -75,8 +75,8 @@ export module APIv3Host {
     const Username = req.body["username"] as string | undefined;
     const Password = req.body["password"] as string | undefined;
 
-    const Destination = Number(req.body["destination"]) as number | undefined;
-    const ResponseID = Number(req.body["responseid"]) as number | undefined;
+    const Destination = req.body["destinationid"] as number | undefined;
+    const ResponseID = req.body["responseid"] as number | undefined;
     const Data = req.body["data"] as string | undefined;
 
     let result = await AuthService.Auth(new Credentials(Username, Password));

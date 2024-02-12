@@ -35,13 +35,17 @@ server.use(Express.json());
 server.use(Express.urlencoded({ extended: true }));
 
 server.use((req, res, next) => {
-  if (typeof req.body != typeof Object) return next();
+  if (!req.is(['application/json', 'application/x-www-form-urlencoded', 'multipart/form-data'])) return next();
 
-  req.body = Object.fromEntries(
-    Object.entries(req.body).map(([k, v]) => [k.toLowerCase(), v])
+  req.body = Object.entries(req.body).reduce(
+    (carry: any, [key, value]: any) => {
+      carry[key.toLowerCase()] = value;
+      return carry;
+    },
+    {}
   );
 
-  next();
+  return next();
 });
 
 if (process.env.HTTPS_REDIRECT === "true") {
