@@ -2,7 +2,8 @@ import React from "react";
 
 export module SHReworkAPI {
   function APIHost(): string {
-    return "https://" + window.location.host;
+    //return "https://" + window.location.host;
+    return "https://sh-rework.ru";
   }
 
   export function SecureAuth(credentials: Credentials): Promise<SecureResult> {
@@ -190,7 +191,7 @@ export class TicketServiceResult {
 export class Ticket {
   public GlobalID?: number;
   public SourceID?: number;
-  public DestinationID: number = -1;
+  public DestinationID?: number;
   public TicketID?: number;
   public ResponseID?: number;
   public Data?: string;

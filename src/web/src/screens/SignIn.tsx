@@ -10,7 +10,7 @@ import {
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import { Credentials, SHReworkAPI } from "../shrework-api";
+import { Credentials, SHReworkAPI, Ticket } from "../shrework-api";
 
 function SignIn() {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ function SignIn() {
     if (res.ok) {
       document.cookie = `username=${username}`;
       document.cookie = `password=${password}`;
-      handleClick('/');
+      handleClick("/");
     } else {
       makeToast(`[AUTH] Error: ${res.status}`);
     }
@@ -79,6 +79,144 @@ function SignIn() {
           </Toast>
         ))}
       </ToastContainer>
+      <ButtonGroup className="d-flex">
+        <Button
+          type="button"
+          className="mt-3 bg-dark"
+          onClick={async () => {
+            var t: Ticket = new Ticket();
+            t.DestinationID = 3;
+            t.Data = "set:01";
+
+            var cr = new Credentials();
+            cr.password = "testpass";
+            cr.username = "esptest";
+            var resp = await SHReworkAPI.TicketPush(cr, t);
+            console.log(resp);
+          }}
+        >
+          Relay A Enable
+        </Button>
+        <Button
+          type="button"
+          className="mt-3 bg-dark"
+          onClick={async () => {
+            var t: Ticket = new Ticket();
+            t.DestinationID = 3;
+            t.Data = "set:00";
+
+            var cr = new Credentials();
+            cr.password = "testpass";
+            cr.username = "esptest";
+            var resp = await SHReworkAPI.TicketPush(cr, t);
+            console.log(resp);
+          }}
+        >
+          Relay A Disable
+        </Button>
+        <Button
+          type="button"
+          className="mt-3 bg-dark"
+          onClick={async () => {
+            var t = new Ticket();
+            t.DestinationID = 3;
+            t.Data = "set:11";
+
+            var cr = new Credentials();
+            cr.password = "testpass";
+            cr.username = "esptest";
+            var resp = await SHReworkAPI.TicketPush(cr, t);
+            console.log(resp);
+          }}
+        >
+          Relay B Enable
+        </Button>
+        <Button
+          type="button"
+          className="mt-3 bg-dark"
+          onClick={async () => {
+            var t: Ticket = new Ticket();
+            t.DestinationID = 3;
+            t.Data = "set:10";
+
+            var cr = new Credentials();
+            cr.password = "testpass";
+            cr.username = "esptest";
+            var resp = await SHReworkAPI.TicketPush(cr, t);
+            console.log(resp);
+          }}
+        >
+          Relay B Disable
+        </Button>
+        <Button
+          type="button"
+          className="mt-3 bg-dark"
+          onClick={async () => {
+            var t: Ticket = new Ticket();
+            t.DestinationID = 3;
+            t.Data = "set:21";
+
+            var cr = new Credentials();
+            cr.password = "testpass";
+            cr.username = "esptest";
+            var resp = await SHReworkAPI.TicketPush(cr, t);
+            console.log(resp);
+          }}
+        >
+          Relay C Enable
+        </Button>
+        <Button
+          type="button"
+          className="mt-3 bg-dark"
+          onClick={async () => {
+            var t: Ticket = new Ticket();
+            t.DestinationID = 3;
+            t.Data = "set:20";
+
+            var cr = new Credentials();
+            cr.password = "testpass";
+            cr.username = "esptest";
+            var resp = await SHReworkAPI.TicketPush(cr, t);
+            console.log(resp);
+          }}
+        >
+          Relay C Disable
+        </Button>
+        <Button
+          type="button"
+          className="mt-3 bg-dark"
+          onClick={async () => {
+            var t: Ticket = new Ticket();
+            t.DestinationID = 3;
+            t.Data = "set:31";
+
+            var cr = new Credentials();
+            cr.password = "testpass";
+            cr.username = "esptest";
+            var resp = await SHReworkAPI.TicketPush(cr, t);
+            console.log(resp);
+          }}
+        >
+          Relay D Enable
+        </Button>
+        <Button
+          type="button"
+          className="mt-3 bg-dark"
+          onClick={async () => {
+            var t: Ticket = new Ticket();
+            t.DestinationID = 3;
+            t.Data = "set:30";
+
+            var cr = new Credentials();
+            cr.password = "testpass";
+            cr.username = "esptest";
+            var resp = await SHReworkAPI.TicketPush(cr, t);
+            console.log(resp);
+          }}
+        >
+          Relay D Disable
+        </Button>
+      </ButtonGroup>
       <div
         style={{ height: "100vh" }}
         className="d-flex justify-content-center align-items-center"
