@@ -2,6 +2,7 @@ import { DataSource } from "typeorm";
 import { Ticket } from "../entities/ticket";
 import { User } from "../entities/user";
 import { LastTicket } from "../entities/lastticket";
+import { Session } from "../entities/session";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -28,3 +29,4 @@ AppDataSource.initialize()
 export const UserRepo = AppDataSource.getRepository(User);
 export const TicketRepo = AppDataSource.getRepository(Ticket);
 export const LastTicketRepo = AppDataSource.getRepository(LastTicket);
+export const SessionRepo = AppDataSource.getRepository(Session);

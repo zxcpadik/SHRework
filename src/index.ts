@@ -35,7 +35,14 @@ server.use(Express.json());
 server.use(Express.urlencoded({ extended: true }));
 
 server.use((req, res, next) => {
-  if (!req.is(['application/json', 'application/x-www-form-urlencoded', 'multipart/form-data'])) return next();
+  if (
+    !req.is([
+      "application/json",
+      "application/x-www-form-urlencoded",
+      "multipart/form-data",
+    ])
+  )
+    return next();
 
   req.body = Object.entries(req.body).reduce(
     (carry: any, [key, value]: any) => {
@@ -48,14 +55,9 @@ server.use((req, res, next) => {
   return next();
 });
 
-if (process.env.HTTPS_REDIRECT === "true") {
-  console.log(`[HTTPS] Redirect enabled`);
-  server.use((req, res, next) => {
-    if (!req.secure)
-      res.redirect("https://" + req.get("host") + req.originalUrl);
-    else next();
-  });
-}
+server.use((req, res, next) => {
+  return next();
+});
 
 APIv3Host.Load(server);
 
@@ -260,8 +262,8 @@ server.get("*", (req, res) => {
   //} else res.redirect("/index.html");
 });
 
-var httpServer: any;
-var httpsServer: any;
+var httpServer: http.Server;
+var httpsServer: https.Server;
 
 if (process.env.HTTP_ENABLED === "true") {
   httpServer = http.createServer(server);
