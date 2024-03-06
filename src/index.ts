@@ -56,6 +56,7 @@ server.use((req, res, next) => {
 });
 
 server.use((req, res, next) => {
+  console.log(`REQ: ${req.url} ${req.body}`);
   return next();
 });
 
@@ -76,6 +77,7 @@ server.get("/api/v2/create/", async (req, res) => {
   const password = req.query["password"] as string | undefined;
 
   let result = await AuthService.Create(new Credentials(username, password));
+
   return res.send(
     result.ok ? { ok: true, status: 120, ID: result.user?.ID } : result
   );

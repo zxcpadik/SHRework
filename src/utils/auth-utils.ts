@@ -16,7 +16,7 @@ class AuthUtils {
   public ValidateUsername(user?: string): boolean {
     if (!user) return false;
 
-    if (user.length > 16 || user.length < 4) return false;
+    if (user.length > 32 || user.length < 4) return false;
     return this.ValidateString(user);
   }
 }
