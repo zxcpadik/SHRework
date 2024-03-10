@@ -31,6 +31,9 @@ class TicketServiceBase {
     if (!ticket.TicketID) ticket.TicketID = lastTicket.TicketID;
 
     let tckt = await TicketRepo.save(ticket);
+    if (tckt) {
+      tckt.Data = "";
+    }
     return new TicketResult(true, 600, [tckt]);
   }
 

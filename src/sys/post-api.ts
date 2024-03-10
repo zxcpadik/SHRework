@@ -3,6 +3,7 @@ import { AuthService, Credentials } from "./auth-service";
 import { Tools } from "../utils/tools";
 import { Ticket } from "../entities/ticket";
 import { TicketService } from "./ticket-service";
+import { RegisterMW } from "../middleware/api-proxy";
 
 export module APIv3Host {
   export function Load(app: Express) {
@@ -23,7 +24,7 @@ export module APIv3Host {
     const Username = req.body["username"] as string | undefined;
     const Password = req.body["password"] as string | undefined;
 
-    let result = await AuthService.Auth(new Credentials(Username, Password));
+    let result = await APIV3EX.Auth(new Credentials(Username, Password));
     return res.json(
       result.ok ? { ok: true, status: 100, ID: result.user?.ID } : result
     );
@@ -32,7 +33,7 @@ export module APIv3Host {
     const username = req.body["username"] as string | undefined;
     const password = req.body["password"] as string | undefined;
 
-    let result = await AuthService.Create(new Credentials(username, password));
+    let result = await APIV3EX.Create(new Credentials(username, password));
     return res.json(
       result.ok ? { ok: true, status: 120, ID: result.user?.ID } : result
     );
@@ -44,7 +45,7 @@ export module APIv3Host {
 
     let result = await AuthService.Auth(new Credentials(username, password));
     if (result.ok) {
-      let changeresult = await AuthService.Update(
+      let changeresult = await APIV3EX.Update(
         new Credentials(username, password),
         newpassword
       );
@@ -63,7 +64,7 @@ export module APIv3Host {
     let result = await AuthService.Auth(new Credentials(username, password));
     if (!result.ok) return res.json(result);
 
-    let deleteresult = await AuthService.Delete(
+    let deleteresult = await APIV3EX.Delete(
       new Credentials(username, password)
     );
     return res.status(200).json(deleteresult);
@@ -90,7 +91,7 @@ export module APIv3Host {
         ticket.TicketID = ResponseID || -1;
         ticket.ResponseID = GenRID;
 
-        let tresult = await TicketService.Push(ticket);
+        let tresult = await APIV3EX.Push(ticket);
         return res.json(tresult);
       } else {
         let ticket = new Ticket();
@@ -99,7 +100,7 @@ export module APIv3Host {
         ticket.DestinationID = Destination || -1;
         ticket.ResponseID = GenRID;
 
-        let tresult = await TicketService.Push(ticket);
+        let tresult = await APIV3EX.Push(ticket);
         return res.json(tresult);
       }
     } else return res.json(result);
@@ -113,7 +114,7 @@ export module APIv3Host {
 
     let result = await AuthService.Auth(new Credentials(username, password));
     if (result.ok) {
-      let tres = await TicketService.Pull(
+      let tres = await APIV3EX.Pull(
         result.user?.ID || -1,
         offset || -1,
         count || 1
@@ -127,7 +128,7 @@ export module APIv3Host {
 
     let result = await AuthService.Auth(new Credentials(username, password));
     if (result.ok) {
-      let tres = await TicketService.Flush(result.user?.ID || -1);
+      let tres = await APIV3EX.Flush(result.user?.ID || -1);
       return res.json({ ok: true, status: 620, count: tres });
     } else return res.json(result);
   }
@@ -137,7 +138,7 @@ export module APIv3Host {
 
     let result = await AuthService.Auth(new Credentials(username, password));
     if (result.ok) {
-      let tres = await TicketService.GetLast(result.user?.ID || -1);
+      let tres = await APIV3EX.GetLast(result.user?.ID || -1);
       return res.json({ ok: true, status: 630, count: tres });
     } else return res.json(result);
   }
@@ -145,6 +146,23 @@ export module APIv3Host {
   // SYSTEM
 
   async function PostAPIv3(req: express.Request, res: express.Response) {
-    return res.send({ ok: true, status: 800, version: API_V3_VER });
+    return res.send(APIV3EX.APIv3());
   }
+
+  export function APIv3() {
+    return { ok: true, status: 800, version: API_V3_VER };
+  }
+
+  export module APIV3EX {
+    export const Push = RegisterMW(TicketService.Push);
+    export const Pull = RegisterMW(TicketService.Pull);
+    export const Flush = RegisterMW(TicketService.Flush);
+    export const GetLast = RegisterMW(TicketService.GetLast);
+    export const Auth = RegisterMW(AuthService.Auth);
+    export const Create = RegisterMW(AuthService.Create);
+    export const Update = RegisterMW(AuthService.Update);
+    export const Delete = RegisterMW(AuthService.Delete);
+    export const APIv3 = RegisterMW(APIv3Host.APIv3);
+  }
+  
 }

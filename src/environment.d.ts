@@ -13,6 +13,8 @@ declare global {
       HTTPS_PKEY: string;
       HTTPS_CA: string;
       HTTP_ENABLED: string;
+
+      TCP_ENBALED: string;
     }
   }
 }

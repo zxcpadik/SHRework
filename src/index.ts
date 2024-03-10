@@ -17,6 +17,8 @@ import fs from "fs";
 import http from "http";
 import https from "https";
 import { APIv3Host } from "./sys/post-api";
+import { ApiEvent, ApiProxy, RegisterMW } from "./middleware/api-proxy";
+import { UDPAPI } from "./sys/tcp-api";
 
 const options = {
   uploadDir: "tmp",
@@ -56,17 +58,36 @@ server.use((req, res, next) => {
 });
 
 server.use((req, res, next) => {
-  console.log(`REQ: ${req.url} ${req.body}`);
+  //console.log(`REQ: ${req.url} ${req.body}`);
   return next();
 });
 
 APIv3Host.Load(server);
+UDPAPI.Load(server);
+
+module APIV1EX {
+  export const Push = RegisterMW(TicketService.Push);
+  export const Pull = RegisterMW(TicketService.Pull);
+  export const Flush = RegisterMW(TicketService.Flush);
+  export const GetLast = RegisterMW(TicketService.GetLast);
+  export const APIv1 = RegisterMW(_APIv1);
+}
+
+module APIV2EX {
+  export const Auth = RegisterMW(AuthService.Auth);
+  export const Create = RegisterMW(AuthService.Create);
+  export const Update = RegisterMW(AuthService.Update);
+  export const Delete = RegisterMW(AuthService.Delete);
+  export const APIv2 = RegisterMW(_APIv2);
+}
+
+// V2
 
 server.get("/api/v2/auth/", async (req, res) => {
   const Username = req.query["username"] as string | undefined;
   const Password = req.query["password"] as string | undefined;
 
-  let result = await AuthService.Auth(new Credentials(Username, Password));
+  let result = await APIV2EX.Auth(new Credentials(Username, Password));
   return res.send(
     result.ok ? { ok: true, status: 100, ID: result.user?.ID } : result
   );
@@ -76,7 +97,7 @@ server.get("/api/v2/create/", async (req, res) => {
   const username = req.query["username"] as string | undefined;
   const password = req.query["password"] as string | undefined;
 
-  let result = await AuthService.Create(new Credentials(username, password));
+  let result = await APIV2EX.Create(new Credentials(username, password));
 
   return res.send(
     result.ok ? { ok: true, status: 120, ID: result.user?.ID } : result
@@ -90,7 +111,7 @@ server.get("/api/v2/update/", async (req, res) => {
 
   let result = await AuthService.Auth(new Credentials(username, password));
   if (result.ok) {
-    let changeresult = await AuthService.Update(
+    let changeresult = await APIV2EX.Update(
       new Credentials(username, password),
       newpassword
     );
@@ -110,11 +131,12 @@ server.get("/api/v2/delete/", async (req, res) => {
   let result = await AuthService.Auth(new Credentials(username, password));
   if (!result.ok) return res.send(result);
 
-  let deleteresult = await AuthService.Delete(
-    new Credentials(username, password)
-  );
+  let deleteresult = await APIV2EX.Delete(new Credentials(username, password));
   return res.send(deleteresult);
 });
+
+
+// V1
 
 server.get("/api/v1/push/", async (req, res) => {
   const Username = req.query["username"] as string | undefined;
@@ -135,7 +157,7 @@ server.get("/api/v1/push/", async (req, res) => {
       ticket.TicketID = ResponseID || -1;
       ticket.ResponseID = GenRID;
 
-      let tresult = await TicketService.Push(ticket);
+      let tresult = await APIV1EX.Push(ticket);
       return res.send(tresult);
     } else {
       let ticket = new Ticket();
@@ -144,7 +166,7 @@ server.get("/api/v1/push/", async (req, res) => {
       ticket.DestinationID = Destination || -1;
       ticket.ResponseID = GenRID;
 
-      let tresult = await TicketService.Push(ticket);
+      let tresult = await APIV1EX.Push(ticket);
       return res.send(tresult);
     }
   } else return res.send(result);
@@ -159,7 +181,7 @@ server.get("/api/v1/pull/", async (req, res) => {
 
   let result = await AuthService.Auth(new Credentials(username, password));
   if (result.ok) {
-    let tres = await TicketService.Pull(
+    let tres = await APIV1EX.Pull(
       result.user?.ID || -1,
       offset || -1,
       count || 1
@@ -174,7 +196,7 @@ server.get("/api/v1/flush/", async (req, res) => {
 
   let result = await AuthService.Auth(new Credentials(username, password));
   if (result.ok) {
-    let tres = await TicketService.Flush(result.user?.ID || -1);
+    let tres = await APIV1EX.Flush(result.user?.ID || -1);
     return res.send({ ok: true, status: 620, count: tres });
   } else return res.send(result);
 });
@@ -185,18 +207,26 @@ server.get("/api/v1/last/", async (req, res) => {
 
   let result = await AuthService.Auth(new Credentials(username, password));
   if (result.ok) {
-    let tres = await TicketService.GetLast(result.user?.ID || -1);
+    let tres = await APIV1EX.GetLast(result.user?.ID || -1);
     return res.send({ ok: true, status: 630, count: tres });
   } else return res.send(result);
 });
 
 server.get("/api/v1/", async (req, res) => {
-  return res.send({ ok: true, status: 800, version: API_V1_VER });
+  return res.send(APIV1EX.APIv1());
 });
 
+function _APIv1() {
+  return { ok: true, status: 800, version: API_V1_VER };
+}
+
 server.get("/api/v2/", async (req, res) => {
-  return res.send({ ok: true, status: 801, version: API_V2_VER });
+  return res.send(APIV2EX.APIv2());
 });
+
+function _APIv2() {
+  return { ok: true, status: 801, version: API_V2_VER };
+}
 
 server.get("/api/v1/user/info/", async (req, res) => {
   res.send({ ok: false, code: 500 });
@@ -217,7 +247,7 @@ server.get("/api/v1/user/info/", async (req, res) => {
     */
 });
 
-server.get("/api/v1/system/info/", async (req, res) => {
+server.get("/api/system/info/", async (req, res) => {
   OS.cpuUsage(function (v: number) {
     let total = (OS.totalmem() / 1024).toFixed(1);
     let free = ((OS.totalmem() - OS.freemem()) / 1024).toFixed(1);
@@ -286,5 +316,3 @@ if (process.env.HTTPS_ENABLED === "true") {
     console.log(`[HTTPS] Server listening on port 443`);
   });
 } else console.log(`[HTTPS] Server disabled`);
-
-// REACT
