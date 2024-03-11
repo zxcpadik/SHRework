@@ -11,6 +11,7 @@
 [X] M#0008 - TicketApi (class -> module).
 [X] A#0009 - implement TicketServiceResult + native transformable
 [X] B#0010 - DEV-BETA TCP API
+[X] R#0011 - TCP API Core DevBeta Stable
 
 [ ] DEV-WILL - Dev PacketRouter.
 [ ] DEV-WILL - Dev PreferenceStore.

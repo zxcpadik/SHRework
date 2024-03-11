@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "buld": "tsc",
-    "start": "tsc && node build/index.js"
+    "build": "tsc",
+    "clean": "rd /s /q build && tsc",
+    "start": "tsc && node build/index.js",
+    "debug": "rd /s /q build && tsc && node build/index.js --inspect"
   },
   "keywords": [],
   "author": "zxcpadik",

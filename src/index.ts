@@ -19,6 +19,8 @@ import https from "https";
 import { APIv3Host } from "./sys/post-api";
 import { ApiEvent, ApiProxy, RegisterMW } from "./middleware/api-proxy";
 import { UDPAPI } from "./sys/tcp-api";
+import { ModuleRepo } from "./sys/db-service";
+import { SmartModule } from "./entities/smartmodule";
 
 const options = {
   uploadDir: "tmp",
@@ -81,10 +83,6 @@ module APIV2EX {
   export const APIv2 = RegisterMW(_APIv2);
 }
 
-ApiProxy.emit.on("onEndPush", (e: ApiEvent, args: TicketResult) => {
-  //console.log(args.GetBuf());
-})
-
 // V2
 
 server.get("/api/v2/auth/", async (req, res) => {
@@ -138,7 +136,6 @@ server.get("/api/v2/delete/", async (req, res) => {
   let deleteresult = await APIV2EX.Delete(new Credentials(username, password));
   return res.send(deleteresult);
 });
-
 
 // V1
 
@@ -289,7 +286,10 @@ setInterval(() => {
 }, 60000);
 
 server.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "/web/index.html"));
+  res.sendFile(path.join(__dirname, "/web/index.html"), (err) => {
+    console.log(`[${Tools.GetDateTime()}][WEB] Error: ${err.message} `);
+    res.sendFile(path.join(__dirname, "/web/404.html"));
+  });
 
   //const path = req.path;
   //const fpath = __dirname + "\\node" + Tools.MakePath(path);
