@@ -129,7 +129,7 @@ export module APIv3Host {
     let result = await AuthService.Auth(new Credentials(username, password));
     if (result.ok) {
       let tres = await APIV3EX.Flush(result.user?.ID || -1);
-      return res.json({ ok: true, status: 620, count: tres });
+      return res.json(tres);
     } else return res.json(result);
   }
   async function PostTicketLast(req: express.Request, res: express.Response) {
@@ -139,7 +139,7 @@ export module APIv3Host {
     let result = await AuthService.Auth(new Credentials(username, password));
     if (result.ok) {
       let tres = await APIV3EX.GetLast(result.user?.ID || -1);
-      return res.json({ ok: true, status: 630, count: tres });
+      return res.json(tres);
     } else return res.json(result);
   }
 

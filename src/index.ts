@@ -201,7 +201,7 @@ server.get("/api/v1/flush/", async (req, res) => {
   let result = await AuthService.Auth(new Credentials(username, password));
   if (result.ok) {
     let tres = await APIV1EX.Flush(result.user?.ID || -1);
-    return res.send({ ok: true, status: 620, count: tres });
+    return res.send(tres);
   } else return res.send(result);
 });
 
@@ -212,7 +212,7 @@ server.get("/api/v1/last/", async (req, res) => {
   let result = await AuthService.Auth(new Credentials(username, password));
   if (result.ok) {
     let tres = await APIV1EX.GetLast(result.user?.ID || -1);
-    return res.send({ ok: true, status: 630, count: tres });
+    return res.send(tres);
   } else return res.send(result);
 });
 

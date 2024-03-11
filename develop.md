@@ -7,7 +7,10 @@
 [X] B#0004 - Beta TCPAPI.
 [X] A#0005 - Ticket, TicketResult - native transformable
 [X] A#0006 - Credentials, SecureResult - native transformable
-[X] M#0007 - SecureResult (class -> module).
+[X] M#0007 - SecureApi (class -> module).
+[X] M#0008 - TicketApi (class -> module).
+[X] A#0009 - implement TicketServiceResult + native transformable
+[X] B#0010 - DEV-BETA TCP API
 
 [ ] DEV-WILL - Dev PacketRouter.
 [ ] DEV-WILL - Dev PreferenceStore.
