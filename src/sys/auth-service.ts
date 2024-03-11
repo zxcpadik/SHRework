@@ -2,8 +2,8 @@ import { UserRepo } from "./db-service";
 import { User } from "../entities/user";
 import { AuthUtil } from "../utils/auth-utils";
 
-class AuthServiceBase {
-  public async Auth(credits: Credentials): Promise<SecureResult> {
+export module AuthService {
+  export async function Auth(credits: Credentials): Promise<SecureResult> {
     if (
       !(
         AuthUtil.ValidatePassword(credits.Password) &&
@@ -25,7 +25,7 @@ class AuthServiceBase {
     return new SecureResult(false, 103);
   }
 
-  public async Create(credits: Credentials): Promise<SecureResult> {
+  export async function Create(credits: Credentials): Promise<SecureResult> {
     if (
       !(
         AuthUtil.ValidatePassword(credits.Password) &&
@@ -47,7 +47,7 @@ class AuthServiceBase {
     return new SecureResult(true, 120, usr);
   }
 
-  public async Update(
+  export async function Update(
     credits: Credentials,
     newpass: string | undefined
   ): Promise<SecureResult> {
@@ -67,7 +67,7 @@ class AuthServiceBase {
     return new SecureResult(true, 150, usr);
   }
 
-  public async Delete(credits: Credentials): Promise<SecureResult> {
+  export async function Delete(credits: Credentials): Promise<SecureResult> {
     if (!AuthUtil.ValidateUsername(credits.Username))
       return new SecureResult(false, 131);
 
@@ -84,6 +84,11 @@ class AuthServiceBase {
 }
 
 export class Credentials {
+  /*  Native size table
+   * Username - UTF-8 chars (int 4 bytes + dynamic)
+   * Password - UTF-8 chars (int 4 bytes + dynamic)
+   */
+
   public Username?: string;
   public Password?: string;
 
@@ -91,9 +96,29 @@ export class Credentials {
     this.Username = Username ? Username?.toLowerCase() : undefined;
     this.Password = Password;
   }
+
+  GetBuf(): Buffer {
+    const _userbuf = Buffer.from(this.Password || "", "utf-8");
+    const _passbuf = Buffer.from(this.Password || "", "utf-8");
+    var ret_buf = Buffer.alloc(8 + _userbuf.length + _passbuf.length);
+
+    ret_buf.writeUInt32LE(_userbuf.length, 0);
+    ret_buf.writeUInt32LE(_passbuf.length, 4);
+
+    _userbuf.copy(ret_buf, 8);
+    _passbuf.copy(ret_buf, 8 + _userbuf.length);
+
+    return ret_buf;
+  }
 }
 
 export class SecureResult {
+  /*  Native size table
+   * ok - bool (1 byte)
+   * status - short (2 bytes)
+   * User -> UserID int (4 bytes)
+   */
+
   public ok: boolean;
   public status: number;
   public user?: User;
@@ -103,6 +128,16 @@ export class SecureResult {
     this.status = Status;
     this.user = User;
   }
+
+  GetBuf(): Buffer {
+    let ret_buf = Buffer.alloc(6);
+
+    ret_buf.writeUInt8(this.ok ? 1 : 0, 0);
+    ret_buf.writeInt16LE(this.status, 1);
+    ret_buf.writeInt32LE(this.user?.ID || -1, 3);
+
+    return ret_buf;
+  }
 }
 
-export const AuthService = new AuthServiceBase();
+//export const AuthService = new AuthServiceBase();

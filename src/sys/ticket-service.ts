@@ -11,9 +11,9 @@ import { LastTicket } from "../entities/lastticket";
 class TicketServiceBase {
   async Push(ticket: Ticket): Promise<TicketResult> {
     if (
-      ticket.DestinationID === -1 ||
-      ticket.SourceID === -1 ||
-      ticket.ResponseID === -1
+      ticket.DestinationID < 0 ||
+      ticket.SourceID < 0 ||
+      ticket.ResponseID < 0
     )
       return new TicketResult(false, 601);
 
@@ -90,6 +90,13 @@ class TicketServiceBase {
 }
 
 export class TicketResult {
+  /*  Native size table
+   * ok - bool (1 byte)
+   * status - short (2 bytes)
+   * count - uint8_t (1 byte)
+   * Ticket - buffer (dynamic)
+   */
+
   public ok: boolean;
   public status: number;
   public tickets?: Ticket[];
@@ -98,6 +105,29 @@ export class TicketResult {
     this.ok = Ok;
     this.status = Status;
     this.tickets = Tickets;
+  }
+
+  GetBuf(): Buffer {
+    var tlen = 0;
+    const _ticketsbuf: Buffer[] = [];
+    this.tickets?.forEach((t, i) => {
+      _ticketsbuf[i] = t.GetBuf();
+      tlen += _ticketsbuf[i].length;
+    });
+
+    var ret_buf = Buffer.alloc(4 + tlen);
+
+    ret_buf.writeUint8((this.ok ? 1 : 0), 0);
+    ret_buf.writeInt16LE(this.status, 1);
+    ret_buf.writeUint8(_ticketsbuf.length, 3);
+
+    let offset = 0;
+    _ticketsbuf.forEach((b, i) => {
+      b.copy(ret_buf, 4 + offset);
+      offset += _ticketsbuf[i].length;
+    });
+
+    return ret_buf;
   }
 }
 export const TicketService = new TicketServiceBase();

@@ -5,7 +5,7 @@ import Express from "express";
 import { AuthService, Credentials } from "./sys/auth-service";
 import OS from "os-utils";
 import { Tools } from "./utils/tools";
-import { TicketService } from "./sys/ticket-service";
+import { TicketResult, TicketService } from "./sys/ticket-service";
 import { Ticket } from "./entities/ticket";
 import formData from "express-form-data";
 import path from "path";
@@ -80,6 +80,10 @@ module APIV2EX {
   export const Delete = RegisterMW(AuthService.Delete);
   export const APIv2 = RegisterMW(_APIv2);
 }
+
+ApiProxy.emit.on("onEndPush", (e: ApiEvent, args: TicketResult) => {
+  //console.log(args.GetBuf());
+})
 
 // V2
 
