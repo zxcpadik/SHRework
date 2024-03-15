@@ -10,10 +10,11 @@ import AwaitEventEmitter from "await-event-emitter";
 import { FIFOBuffer } from "../utils/fifo-buffer";
 import { ModuleRepo } from "./db-service";
 
+const PROTO_DBG = false;
 const PORT = 3000;
 
 interface ITCPAPIFunctions {
-  [key: string]: (buf: Buffer) => Buffer;
+  [key: string]: (buf: Buffer, s: TCPSession) => Promise<Buffer>;
 }
 
 export module UDPAPI {
@@ -35,18 +36,19 @@ export module UDPAPI {
     SN: string,
     GlobalID: string
   ): Promise<boolean> {
-    return await ModuleRepo.exists({
+    const sm = await ModuleRepo.findOne({
       where: {
-        UserID: UserID,
-        SerialNumber: SN,
-        GlobalID: GlobalID,
+        UserID: UserID
       },
+      cache: true
     });
+
+    return sm?.SerialNumber.toLowerCase() === SN && sm.GlobalID.toLowerCase() === GlobalID;
   }
 
   async function ClientHandler(socket: net.Socket) {
     let s = new TCPSession(++IDcounter, socket, socket.remoteAddress || "null");
-    console.debug(
+    if (PROTO_DBG) console.debug(
       `[${Tools.GetDateTime()}][TCP]{${s.ID}} Connected ${
         (socket.address() as AddressInfo).address
       }`
@@ -59,29 +61,35 @@ export module UDPAPI {
     s.UserID = UserID;
     s.SN = SN;
 
-    console.debug(
+    if (PROTO_DBG) console.debug(
       `[${Tools.GetDateTime()}][TCP]{${s.ID}} Data ${UserID}:${GlobalID}:${SN}`
     );
 
     const valid = await CheckTCPValid(UserID, SN, GlobalID);
     if (!valid) {
-      console.debug(`[${Tools.GetDateTime()}][TCP]{${s.ID}} Destroyed!`);
+      if (PROTO_DBG) console.debug(`[${Tools.GetDateTime()}][TCP]{${s.ID}} Invalid!`);
       s.Close();
       return;
     }
-    console.debug(`[${Tools.GetDateTime()}][TCP]{${s.ID}} Valid!`);
+    if (PROTO_DBG) console.debug(`[${Tools.GetDateTime()}][TCP]{${s.ID}} Valid!`);
 
     s._idle = true;
     if (s._Buffer.size > 0) s._onData();
 
-    socket.on("error", () => {
+    socket.on("error", (err) => {
       s.Close();
+      if (PROTO_DBG) console.debug(`[${Tools.GetDateTime()}][TCP]{${s.ID}} Error! ${err.message}`);
     });
   }
 
   export const APIproxy: ITCPAPIFunctions = {
-    "echo": (buf: Buffer): Buffer => {
-      return Buffer.from(`Reply: ${buf.toString('utf8')}`, "utf8");
+    ping: async (buf, s): Promise<Buffer> => {
+      return Buffer.from(`pong`, "utf8");
+    },
+    auth: async (buf, s): Promise<Buffer> => {
+      let creds = Credentials.FromBuf(buf);
+      let result = await AuthService.Auth(creds);
+      return result.GetBuf();
     },
   };
 }
@@ -104,6 +112,9 @@ class TCPSession {
 
   Read(count: number): Promise<Buffer> {
     return new Promise((res, rej) => {
+      if (this._Buffer.size >= count)
+        return res(this._Buffer.deq(count) || Buffer.alloc(0));
+
       let lfunc = (byts: number) => {
         if (byts >= count) {
           this._ave.off("data", lfunc);
@@ -117,22 +128,28 @@ class TCPSession {
   }
 
   async ReadPacket() {
-    const size = this._Buffer.deq(4)?.readUInt32LE();
-    if (size == undefined) {
-      this._idle = true;
-      return;
-    }
-    if (size > 1024 *  1024) return;
+    const sizeBuf = await this.Read(4);
+    const size = sizeBuf.readUInt32LE();
+
+    if (size > 1024 * 1024) { return; }
     const buf = await this.Read(size);
 
     const cmdArgSizeBuf = await this.Read(4);
     const cmdArgSize = cmdArgSizeBuf.readUInt32LE();
-    if (cmdArgSize > 1024 * 1024) return;
+
+    if (cmdArgSize > 1024 * 1024) { return; }
     const cmdArgBuf = await this.Read(cmdArgSize);
 
     const cmd = buf.toString("utf8").toLowerCase();
-    if (UDPAPI.APIproxy[cmd] == null) { console.debug(`[${Tools.GetDateTime()}][TCP] Unknow CMD: ${buf.toString("hex")} skip...`); return; }
-    const res_buf = UDPAPI.APIproxy[cmd](cmdArgBuf) as Buffer;
+    if (UDPAPI.APIproxy[cmd] == null) {
+      if (PROTO_DBG) console.debug(
+        `[${Tools.GetDateTime()}][TCP] Unknow CMD: ${buf.toString(
+          "hex"
+        )} skip...`
+      );
+      return;
+    }
+    const res_buf = (await UDPAPI.APIproxy[cmd](cmdArgBuf, this)) as Buffer;
     const size_buf = Buffer.alloc(4);
     size_buf.writeUint32LE(res_buf.length);
 

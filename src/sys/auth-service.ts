@@ -93,13 +93,13 @@ export class Credentials {
   public Password?: string;
 
   constructor(Username?: string, Password?: string) {
-    this.Username = Username ? Username?.toLowerCase() : undefined;
+    this.Username = Username?.toLowerCase();
     this.Password = Password;
   }
 
   GetBuf(): Buffer {
-    const _userbuf = Buffer.from(this.Password || "", "utf-8");
-    const _passbuf = Buffer.from(this.Password || "", "utf-8");
+    const _userbuf = Buffer.from(this.Username || "null", "utf-8");
+    const _passbuf = Buffer.from(this.Password || "null", "utf-8");
     var ret_buf = Buffer.alloc(8 + _userbuf.length + _passbuf.length);
 
     ret_buf.writeUInt32LE(_userbuf.length, 0);
@@ -109,6 +109,16 @@ export class Credentials {
     _passbuf.copy(ret_buf, 8 + _userbuf.length);
 
     return ret_buf;
+  }
+
+  static FromBuf(buf: Buffer): Credentials {
+    let userSize = buf.readUInt32LE(0);
+    let passSize = buf.readUInt32LE(4);
+
+    let Username = buf.toString("utf-8", 8, 8 + userSize);
+    let Password = buf.toString("utf-8", 8 + userSize, 8 + userSize + passSize);
+
+    return new Credentials(Username, Password);
   }
 }
 
@@ -130,11 +140,11 @@ export class SecureResult {
   }
 
   GetBuf(): Buffer {
-    let ret_buf = Buffer.alloc(6);
+    let ret_buf = Buffer.alloc(7);
 
     ret_buf.writeUInt8(this.ok ? 1 : 0, 0);
     ret_buf.writeInt16LE(this.status, 1);
-    ret_buf.writeInt32LE(this.user?.ID || -1, 3);
+    ret_buf.writeInt32LE((this.user?.ID || -1), 3);
 
     return ret_buf;
   }
