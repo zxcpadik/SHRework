@@ -2,6 +2,7 @@
 101: auth_invalid
 102: auth_username
 103: auth_password
+104: auth_napi_invalid
 
 110: DEPRECATERD_exists_successful
 111: DEPRECATERD_exists_username_null

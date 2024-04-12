@@ -288,7 +288,9 @@ setInterval(() => {
 server.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "/web/index.html"), (err) => {
     console.log(`[${Tools.GetDateTime()}][WEB] Error: ${err.message} `);
-    res.sendFile(path.join(__dirname, "/web/404.html"));
+    res.sendFile(path.join(__dirname, "/web/404.html"), (err) => {
+      res.send("ERROR");
+    });
   });
 
   //const path = req.path;

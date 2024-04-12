@@ -1,8 +1,8 @@
 import express, { Express } from "express";
-import { AuthService, Credentials } from "./auth-service";
+import { AuthService, Credentials, SecureResult } from "./auth-service";
 import { Tools } from "../utils/tools";
 import { Ticket } from "../entities/ticket";
-import { TicketService } from "./ticket-service";
+import { TicketResult, TicketService } from "./ticket-service";
 import net, { AddressInfo } from "net";
 import { And } from "typeorm";
 import { Readable, Stream } from "stream";
@@ -89,8 +89,43 @@ export module UDPAPI {
     auth: async (buf, s): Promise<Buffer> => {
       let creds = Credentials.FromBuf(buf);
       let result = await AuthService.Auth(creds);
+      if (result.ok) {
+        if (result.user === s.UserID) {
+          s._Credits = creds;
+          return result.GetBuf();
+        }
+        else return new SecureResult(false, 104).GetBuf();
+      }
       return result.GetBuf();
     },
+    // Create
+    // Update
+    // Delete
+
+    push: async (buf, s): Promise<Buffer> => {
+      let usr = await AuthService.Auth(s._Credits);
+      if (!usr.ok) return new TicketResult(false, usr.status).GetBuf();
+
+      let t = Ticket.FromBuf(buf);
+      t.SourceID = usr.user?.ID || -1;
+      let result = await TicketService.Push(t);
+      
+      return result.GetBuf();
+    },
+    pull: async (buf, s): Promise<Buffer> => {
+      let usr = await AuthService.Auth(s._Credits);
+      if (!usr.ok) return new TicketResult(false, usr.status).GetBuf();
+
+      let _count = buf.readUInt32LE(0);
+      let count = _count === 0 ? 1 : _count;
+      let _offset = buf.readUInt32LE(4);
+      let offset = _offset === 0 ? -1 : _offset;
+
+      let result = await TicketService.Pull(usr.user?.ID || -1, offset, count);
+      return result.GetBuf();
+    },
+    // Last
+    // Flush
   };
 }
 
@@ -101,6 +136,8 @@ class TCPSession {
 
   UserID?: number;
   SN?: string;
+
+  _Credits: Credentials = new Credentials();
 
   _Buffer = new FIFOBuffer();
   _ave = new AwaitEventEmitter();

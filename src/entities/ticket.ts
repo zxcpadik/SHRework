@@ -53,4 +53,22 @@ export class Ticket {
 
     return ret_buf;
   }
+  static FromBuf(buf: Buffer): Ticket {
+    let t = new Ticket();
+    
+    t.GlobalID = buf.readUint32LE(0);
+    t.SourceID = buf.readUint32LE(4);
+    t.DestinationID = buf.readUint32LE(8);
+    let tID = buf.readUint32LE(12);
+    t.TicketID = tID === 0 ? -1 : undefined;
+    t.ResponseID = buf.readUint32LE(16);
+
+    let dataSize = buf.readUint32LE(20);
+    let dateSize = buf.readUint32LE(24);
+
+    t.Data = buf.toString('utf8', 28, 28 + dataSize);
+    t.Date = new Date(buf.toString('utf8', 29 + dataSize, 28 + dataSize + dateSize));
+
+    return t;
+  }
 }
