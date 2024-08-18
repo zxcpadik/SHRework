@@ -39,8 +39,8 @@ export class Ticket {
 
     var ret_buf = Buffer.alloc(28 + _datebuf.length + _databuf.length);
 
-    ret_buf.writeUint32LE(this.GlobalID, 0);
-    ret_buf.writeUint32LE(this.SourceID, 4);
+    ret_buf.writeUint32LE(this.GlobalID < 0 ? 0 : this.GlobalID, 0);
+    ret_buf.writeUint32LE(this.SourceID < 0 ? 0 : this.SourceID, 4);
     ret_buf.writeUint32LE(this.DestinationID, 8);
     ret_buf.writeUint32LE(this.TicketID || 0, 12);
     ret_buf.writeUint32LE(this.ResponseID, 16);

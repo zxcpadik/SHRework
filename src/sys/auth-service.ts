@@ -84,10 +84,14 @@ export module AuthService {
 }
 
 export class Credentials {
-  /*  Native size table
-   * Username - UTF-8 chars (int 4 bytes + dynamic)
-   * Password - UTF-8 chars (int 4 bytes + dynamic)
+  /*  Native size table - 10 bytes
+   * cid              - ushort (2 bytes) - 12
+   * usernamebuf_len  - uint (4 bytes)
+   * passwordbuf_len  - uint (4 butes)
+   * username         - UTF-8 chars (dynamic)
+   * password         - UTF-8 chars (dynamic)
    */
+  readonly classID = 12;
 
   public Username?: string;
   public Password?: string;
@@ -100,34 +104,37 @@ export class Credentials {
   GetBuf(): Buffer {
     const _userbuf = Buffer.from(this.Username || "null", "utf-8");
     const _passbuf = Buffer.from(this.Password || "null", "utf-8");
-    var ret_buf = Buffer.alloc(8 + _userbuf.length + _passbuf.length);
+    var ret_buf = Buffer.alloc(10 + _userbuf.length + _passbuf.length);
 
-    ret_buf.writeUInt32LE(_userbuf.length, 0);
-    ret_buf.writeUInt32LE(_passbuf.length, 4);
+    ret_buf.writeUint16LE(this.classID, 0);
+    ret_buf.writeUInt32LE(_userbuf.length, 2);
+    ret_buf.writeUInt32LE(_passbuf.length, 6);
 
-    _userbuf.copy(ret_buf, 8);
-    _passbuf.copy(ret_buf, 8 + _userbuf.length);
+    _userbuf.copy(ret_buf, 10);
+    _passbuf.copy(ret_buf, 10 + _userbuf.length);
 
     return ret_buf;
   }
 
   static FromBuf(buf: Buffer): Credentials {
-    let userSize = buf.readUInt32LE(0);
-    let passSize = buf.readUInt32LE(4);
+    let userSize = buf.readUInt32LE(2);
+    let passSize = buf.readUInt32LE(6);
 
-    let Username = buf.toString("utf-8", 8, 8 + userSize);
-    let Password = buf.toString("utf-8", 8 + userSize, 8 + userSize + passSize);
+    let Username = buf.toString("utf-8", 10, 10 + userSize);
+    let Password = buf.toString("utf-8", 10 + userSize, 10 + userSize + passSize);
 
     return new Credentials(Username, Password);
   }
 }
 
 export class SecureResult {
-  /*  Native size table
-   * ok - bool (1 byte)
-   * status - short (2 bytes)
-   * User -> UserID int (4 bytes)
+  /*  Native size table - 9 bytes
+   * cid      - ushort (2 bytes) - 13
+   * ok       - bool (1 byte)
+   * status   - short (2 bytes)
+   * userid   - int (4 bytes)
    */
+  readonly classID = 13;
 
   public ok: boolean;
   public status: number;
@@ -140,11 +147,12 @@ export class SecureResult {
   }
 
   GetBuf(): Buffer {
-    let ret_buf = Buffer.alloc(7);
+    let ret_buf = Buffer.alloc(9);
 
-    ret_buf.writeUInt8(this.ok ? 1 : 0, 0);
-    ret_buf.writeInt16LE(this.status, 1);
-    ret_buf.writeInt32LE((this.user?.ID || -1), 3);
+    ret_buf.writeUint16LE(this.classID, 0);
+    ret_buf.writeUInt8(this.ok ? 1 : 0, 2);
+    ret_buf.writeInt16LE(this.status, 3);
+    ret_buf.writeInt32LE((this.user?.ID || -1), 5);
 
     return ret_buf;
   }

@@ -7,6 +7,7 @@ import {
 import { Ticket } from "../entities/ticket";
 import { And, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
 import { LastTicket } from "../entities/lastticket";
+import { UDPAPI } from "./tcp-api";
 
 export module TicketService {
   export async function Push(ticket: Ticket): Promise<TicketResult> {
@@ -14,8 +15,7 @@ export module TicketService {
       ticket.DestinationID < 0 ||
       ticket.SourceID < 0 ||
       ticket.ResponseID < 0
-    )
-      return new TicketResult(false, 601);
+    ) return new TicketResult(false, 601);
 
     let lastTicket = await LastTicketRepo.findOneBy({
       UserID: ticket.DestinationID,
@@ -30,10 +30,19 @@ export module TicketService {
 
     if (!ticket.TicketID) ticket.TicketID = lastTicket.TicketID;
 
+    // TCP-SECTION
+    let tcp_s = UDPAPI.USRegistry[ticket.DestinationID];
+    if (tcp_s) {
+      let tres = new TicketResult(true, 0, [ticket]);
+      tcp_s.ProtoHand(tres.GetBuf(), () => {});
+    }
+    // *-*-*-*
+
     let tckt = await TicketRepo.save(ticket);
     if (tckt) {
       tckt.Data = "";
     }
+
     return new TicketResult(true, 600, [tckt]);
   }
 
@@ -86,12 +95,15 @@ export module TicketService {
 }
 
 export class TicketResult {
-  /*  Native size table
-   * ok - bool (1 byte)
-   * status - short (2 bytes)
-   * count - uint8_t (1 byte)
-   * Ticket - buffer (dynamic)
+  /*  Native size table - 6 bytes
+   * сid      - ushort (2 bytes) - 10
+   * ok       - bool (1 byte)
+   * status   - short (2 bytes)
+   * count    - uint8 (1 byte)
+   * tickets  - buffer (dynamic)
    */
+
+  readonly classID = 10;
 
   public ok: boolean;
   public status: number;
@@ -111,15 +123,16 @@ export class TicketResult {
       tlen += _ticketsbuf[i].length;
     });
 
-    var ret_buf = Buffer.alloc(4 + tlen);
+    var ret_buf = Buffer.alloc(6 + tlen);
 
-    ret_buf.writeUint8(this.ok ? 1 : 0, 0);
-    ret_buf.writeInt16LE(this.status, 1);
-    ret_buf.writeUint8(_ticketsbuf.length, 3);
+    ret_buf.writeUint16LE(this.classID, 0);
+    ret_buf.writeUint8(this.ok ? 1 : 0, 2);
+    ret_buf.writeInt16LE(this.status, 3);
+    ret_buf.writeUint8(this.tickets?.length || 0, 5);
 
     let offset = 0;
     _ticketsbuf.forEach((b, i) => {
-      b.copy(ret_buf, 4 + offset);
+      b.copy(ret_buf, 6 + offset);
       offset += _ticketsbuf[i].length;
     });
 
@@ -127,11 +140,14 @@ export class TicketResult {
   }
 }
 export class TicketServiceResult {
-  /*  Native size table
-   * ok - bool (1 byte)
-   * status - short (2 bytes)
-   * count - int (4 byte)
+  /*  Native size table - 9
+   * cid      - short (2 bytes) - 11
+   * ok       - bool (1 byte)
+   * status   - short (2 bytes)
+   * count    - int (4 byte)
    */
+
+  readonly classID = 11;
 
   public ok: boolean;
   public status: number;
@@ -144,11 +160,12 @@ export class TicketServiceResult {
   }
 
   GetBuf(): Buffer {
-    var ret_buf = Buffer.alloc(7);
+    var ret_buf = Buffer.alloc(9);
 
-    ret_buf.writeUint8(this.ok ? 1 : 0, 0);
-    ret_buf.writeInt16LE(this.status, 1);
-    ret_buf.writeInt32LE(this.count, 3);
+    ret_buf.writeUint16LE(this.classID, 0);
+    ret_buf.writeUint8(this.ok ? 1 : 0, 2);
+    ret_buf.writeInt16LE(this.status, 3);
+    ret_buf.writeInt32LE(this.count, 5);
 
     return ret_buf;
   }
