@@ -84,10 +84,10 @@ export module AuthService {
 }
 
 export class Credentials {
-  /*  Native size table - 10 bytes
+  /*  Native size table - 4 bytes
    * cid              - ushort (2 bytes) - 12
-   * usernamebuf_len  - uint (4 bytes)
-   * passwordbuf_len  - uint (4 butes)
+   * usernamebuf_len  - uint8 (1 bytes)
+   * passwordbuf_len  - uint8 (1 bytes)
    * username         - UTF-8 chars (dynamic)
    * password         - UTF-8 chars (dynamic)
    */
@@ -104,24 +104,24 @@ export class Credentials {
   GetBuf(): Buffer {
     const _userbuf = Buffer.from(this.Username || "null", "utf-8");
     const _passbuf = Buffer.from(this.Password || "null", "utf-8");
-    var ret_buf = Buffer.alloc(10 + _userbuf.length + _passbuf.length);
+    var ret_buf = Buffer.alloc(4 + _userbuf.length + _passbuf.length);
 
     ret_buf.writeUint16LE(this.classID, 0);
-    ret_buf.writeUInt32LE(_userbuf.length, 2);
-    ret_buf.writeUInt32LE(_passbuf.length, 6);
+    ret_buf.writeUInt8(_userbuf.length, 2);
+    ret_buf.writeUInt8(_passbuf.length, 3);
 
-    _userbuf.copy(ret_buf, 10);
-    _passbuf.copy(ret_buf, 10 + _userbuf.length);
+    _userbuf.copy(ret_buf, 4);
+    _passbuf.copy(ret_buf, 4 + _userbuf.length);
 
     return ret_buf;
   }
 
   static FromBuf(buf: Buffer): Credentials {
-    let userSize = buf.readUInt32LE(2);
-    let passSize = buf.readUInt32LE(6);
+    let userSize = buf.readUint8(2);
+    let passSize = buf.readUint8(3);
 
-    let Username = buf.toString("utf-8", 10, 10 + userSize);
-    let Password = buf.toString("utf-8", 10 + userSize, 10 + userSize + passSize);
+    let Username = buf.toString("utf-8", 4, 4 + userSize);
+    let Password = buf.toString("utf-8", 4 + userSize, 4 + userSize + passSize);
 
     return new Credentials(Username, Password);
   }

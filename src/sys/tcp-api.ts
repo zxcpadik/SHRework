@@ -15,11 +15,18 @@ const PROTO_DBG = false;
 const PORT = process.env.TCP_PORT;
 const PROTO_GUARD = "SHRework"
 
-const SIG_READ    = 100777100;
-const SIG_RREAD   = 200777200;
-const SIG_WRITE   = 300777300;
-const SIG_RWRITE  = 400777400;
-const SIG_CROSS   = 500777500;
+const SIG_SLAVE_VOID_READ  = 100777100;
+const SIG_SLAVE_VOID_WRITE = 200777200;
+const SIG_SLAVE_DATA_READ  = 300777300;
+const SIG_SLAVE_DATA_WRITE = 400777400;
+
+const SIG_MASTER_VOID_READ  = 100555100;
+const SIG_MASTER_VOID_WRITE = 200555200;
+const SIG_MASTER_DATA_READ  = 300555300;
+const SIG_MASTER_DATA_WRITE = 400555400;
+
+const SIG_CROSS   = 100999100;
+const SIG_CANCEL  = 200999200;
 
 const Ping_CID = 5;
 
@@ -194,18 +201,26 @@ class TCPSession {
     if (this._Buffer.size > 0) {
       let rsig = (await this.Read(4)).readInt32LE();
 
-      if (rsig == SIG_WRITE) {
-        if (!(await this.sig_write(SIG_RREAD))) return false;;
-        return !_write;
-      } else return _write;
+      switch (rsig) {
+        case SIG_SLAVE_VOID_READ: await this.sig_write(_write ? SIG_MASTER_DATA_WRITE : SIG_CANCEL); return _write;
+        case SIG_SLAVE_VOID_WRITE: await this.sig_write(_write ? SIG_CROSS : SIG_MASTER_DATA_READ); return !_write;
+        case SIG_SLAVE_DATA_READ: await this.sig_write(_write ? SIG_MASTER_DATA_WRITE : SIG_CANCEL); return _write;
+        case SIG_SLAVE_DATA_WRITE: await this.sig_write(_write ? SIG_CROSS : SIG_MASTER_DATA_READ); return !_write;
+        case SIG_CANCEL: return false;
+        case SIG_CROSS: return false;
+      }
     } else {
-      if (!(await this.sig_write(_write ? SIG_RWRITE : SIG_RREAD))) return false;
-      let rsigbuf = (await this.Read(4));
-      let rsig = rsigbuf.readInt32LE(); // ERROR
-
-      if (rsig == SIG_CROSS) return false;
-      else if (rsig == SIG_READ) return true;
-      else return false;
+      await this.sig_write(_write ? SIG_MASTER_VOID_WRITE : SIG_MASTER_VOID_READ);
+      
+      let rsig = (await this.Read(4)).readInt32LE();
+      switch (rsig) {
+        case SIG_SLAVE_VOID_READ: return _write;
+        case SIG_SLAVE_VOID_WRITE: return !_write;
+        case SIG_SLAVE_DATA_READ: return _write;
+        case SIG_SLAVE_DATA_WRITE: return !_write;
+        case SIG_CANCEL: return false;
+        case SIG_CROSS: return false;
+      }
     }
   }
 
@@ -242,9 +257,9 @@ class TCPSession {
     if (this._protect || this._queue.length <= 0) return;
     this.protect(true);
     while (this._queue.length > 0) {
-      const obj = this._queue.shift();
+      let obj = this._queue.shift();
       if (!obj) break;
-      if (!(await this.WritePacketEX(obj.buf))) { continue; } // TODO : ERROR SIGNAL
+      if (!(await this.WritePacketEX(obj.buf))) { this._queue.unshift(obj); break; } // TODO : ERROR SIGNAL
       let res = await this.ReadPacket();
       await obj.func(res);
     }
