@@ -2,25 +2,16 @@ import { config } from "dotenv";
 config();
 
 import Express from "express";
-import { AuthService, Credentials } from "./sys/auth-service";
 import OS from "os-utils";
 import { Tools } from "./utils/tools";
-import { TicketResult, TicketService } from "./sys/ticket-service";
-import { Ticket } from "./entities/ticket";
 import formData from "express-form-data";
 import path from "path";
-
-const API_V1_VER = 1;
-const API_V2_VER = 1;
 
 import fs from "fs";
 import http from "http";
 import https from "https";
 import { APIv3Host } from "./sys/post-api";
-import { ApiEvent, ApiProxy, RegisterMW } from "./middleware/api-proxy";
 import { UDPAPI } from "./sys/tcp-api";
-import { ModuleRepo } from "./sys/db-service";
-import { SmartModule } from "./entities/smartmodule";
 
 const options = {
   uploadDir: "tmp",
@@ -59,194 +50,8 @@ server.use((req, res, next) => {
   return next();
 });
 
-server.use((req, res, next) => {
-  //console.log(`REQ: ${req.url} ${req.body}`);
-  return next();
-});
-
 APIv3Host.Load(server);
 UDPAPI.Load(server);
-
-module APIV1EX {
-  export const Push = RegisterMW(TicketService.Push);
-  export const Pull = RegisterMW(TicketService.Pull);
-  export const Flush = RegisterMW(TicketService.Flush);
-  export const GetLast = RegisterMW(TicketService.GetLast);
-  export const APIv1 = RegisterMW(_APIv1);
-}
-
-module APIV2EX {
-  export const Auth = RegisterMW(AuthService.Auth);
-  export const Create = RegisterMW(AuthService.Create);
-  export const Update = RegisterMW(AuthService.Update);
-  export const Delete = RegisterMW(AuthService.Delete);
-  export const APIv2 = RegisterMW(_APIv2);
-}
-
-// V2
-
-server.get("/api/v2/auth/", async (req, res) => {
-  const Username = req.query["username"] as string | undefined;
-  const Password = req.query["password"] as string | undefined;
-
-  let result = await APIV2EX.Auth(new Credentials(Username, Password));
-  return res.send(
-    result.ok ? { ok: true, status: 100, ID: result.user?.ID } : result
-  );
-});
-
-server.get("/api/v2/create/", async (req, res) => {
-  const username = req.query["username"] as string | undefined;
-  const password = req.query["password"] as string | undefined;
-
-  let result = await APIV2EX.Create(new Credentials(username, password));
-
-  return res.send(
-    result.ok ? { ok: true, status: 120, ID: result.user?.ID } : result
-  );
-});
-
-server.get("/api/v2/update/", async (req, res) => {
-  const username = req.query["username"] as string | undefined;
-  const password = req.query["password"] as string | undefined;
-  const newpassword = req.query["newpassword"] as string | undefined;
-
-  let result = await AuthService.Auth(new Credentials(username, password));
-  if (result.ok) {
-    let changeresult = await APIV2EX.Update(
-      new Credentials(username, password),
-      newpassword
-    );
-
-    return res.send(
-      changeresult.ok
-        ? { ok: true, status: 150, ID: changeresult.user?.ID }
-        : changeresult
-    );
-  } else return res.send(result);
-});
-
-server.get("/api/v2/delete/", async (req, res) => {
-  const username = req.query["username"] as string | undefined;
-  const password = req.query["password"] as string | undefined;
-
-  let result = await AuthService.Auth(new Credentials(username, password));
-  if (!result.ok) return res.send(result);
-
-  let deleteresult = await APIV2EX.Delete(new Credentials(username, password));
-  return res.send(deleteresult);
-});
-
-// V1
-
-server.get("/api/v1/push/", async (req, res) => {
-  const Username = req.query["username"] as string | undefined;
-  const Password = req.query["password"] as string | undefined;
-
-  const Destination = Number(req.query["destination"]) as number | undefined;
-  const ResponseID = Number(req.query["responseid"]) as number | undefined;
-  const Data = req.query["data"] as string | undefined;
-
-  let result = await AuthService.Auth(new Credentials(Username, Password));
-  if (result.ok) {
-    let GenRID = Tools.Between(100000, 999999);
-    if (ResponseID && ResponseID !== Number.NaN) {
-      let ticket = new Ticket();
-      ticket.SourceID = result.user?.ID || -1;
-      ticket.Data = Data || "";
-      ticket.DestinationID = Destination || -1;
-      ticket.TicketID = ResponseID || -1;
-      ticket.ResponseID = GenRID;
-
-      let tresult = await APIV1EX.Push(ticket);
-      return res.send(tresult);
-    } else {
-      let ticket = new Ticket();
-      ticket.SourceID = result.user?.ID || -1;
-      ticket.Data = Data || "";
-      ticket.DestinationID = Destination || -1;
-      ticket.ResponseID = GenRID;
-
-      let tresult = await APIV1EX.Push(ticket);
-      return res.send(tresult);
-    }
-  } else return res.send(result);
-});
-
-server.get("/api/v1/pull/", async (req, res) => {
-  const username = req.query["username"] as string | undefined;
-  const password = req.query["password"] as string | undefined;
-
-  const offset = Number(req.query["offset"]) as number | undefined;
-  const count = Number(req.query["count"]) as number | undefined;
-
-  let result = await AuthService.Auth(new Credentials(username, password));
-  if (result.ok) {
-    let tres = await APIV1EX.Pull(
-      result.user?.ID || -1,
-      offset || -1,
-      count || 1
-    );
-    res.send(tres);
-  } else return res.send(result);
-});
-
-server.get("/api/v1/flush/", async (req, res) => {
-  const username = req.query["username"] as string | undefined;
-  const password = req.query["password"] as string | undefined;
-
-  let result = await AuthService.Auth(new Credentials(username, password));
-  if (result.ok) {
-    let tres = await APIV1EX.Flush(result.user?.ID || -1);
-    return res.send(tres);
-  } else return res.send(result);
-});
-
-server.get("/api/v1/last/", async (req, res) => {
-  const username = req.query["username"] as string | undefined;
-  const password = req.query["password"] as string | undefined;
-
-  let result = await AuthService.Auth(new Credentials(username, password));
-  if (result.ok) {
-    let tres = await APIV1EX.GetLast(result.user?.ID || -1);
-    return res.send(tres);
-  } else return res.send(result);
-});
-
-server.get("/api/v1/", async (req, res) => {
-  return res.send(APIV1EX.APIv1());
-});
-
-function _APIv1() {
-  return { ok: true, status: 800, version: API_V1_VER };
-}
-
-server.get("/api/v2/", async (req, res) => {
-  return res.send(APIV2EX.APIv2());
-});
-
-function _APIv2() {
-  return { ok: true, status: 801, version: API_V2_VER };
-}
-
-server.get("/api/v1/user/info/", async (req, res) => {
-  res.send({ ok: false, code: 500 });
-  return;
-  /*
-    const Username = req.query['username'];
-    const Password = req.query['password'];
-    const UserID = req.query['userid'];
-
-    secure.Auth({ username: Username, password: Password }, (err, resp) => {
-        if (err != null) { res.send({ ok: false, code: 402 }); return; }
-        if (!resp.ok) { res.send(resp); return; }
-
-        if (userid == null) { res.send({ ok: false, code: 710 }); return; }
-
-        res.send({ ok: true, code: 750, last: secure.GetLastAuth(userid) });
-    });
-    */
-});
 
 server.get("/api/system/info/", async (req, res) => {
   OS.cpuUsage(function (v: number) {

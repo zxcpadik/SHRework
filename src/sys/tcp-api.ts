@@ -1,17 +1,14 @@
 import express, { Express } from "express";
 import { AuthService, Credentials, SecureResult } from "./auth-service";
-import { Tools } from "../utils/tools";
 import { Ticket } from "../entities/ticket";
 import { TicketResult, TicketService } from "./ticket-service";
-import net, { AddressInfo } from "net";
-import { And } from "typeorm";
+import net from "net";
 import { Readable, Stream } from "stream";
 import AwaitEventEmitter from "await-event-emitter";
 import { FIFOBuffer } from "../utils/fifo-buffer";
 import { ModuleRepo } from "./db-service";
 import { randomBytes } from "crypto";
 
-const PROTO_DBG = false;
 const PORT = process.env.TCP_PORT;
 const PROTO_GUARD = "SHRework"
 
@@ -32,9 +29,6 @@ const Ping_CID = 5;
 
 interface ITCPAPIFunctions {
   [key: string]: (buf: Buffer, s: TCPSession) => Promise<Buffer>;
-}
-interface ICIDRegistry {
-  [key: string]: string;
 }
 interface IUSRegistry {
   [username: string]: TCPSession;
@@ -136,7 +130,6 @@ export module UDPAPI {
     'auth', // 12
     'null', // 13
   ];
-
   export const USRegistry: IUSRegistry = {};
 
   export function CIDBuf(buf: Buffer) {

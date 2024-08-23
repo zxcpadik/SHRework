@@ -17,9 +17,7 @@ export module TicketService {
       ticket.ResponseID < 0
     ) return new TicketResult(false, 601);
 
-    let lastTicket = await LastTicketRepo.findOneBy({
-      UserID: ticket.DestinationID,
-    });
+    let lastTicket = await LastTicketRepo.findOneBy({ UserID: ticket.DestinationID });
     if (!lastTicket) {
       lastTicket = new LastTicket();
       lastTicket.UserID = ticket.DestinationID;
@@ -30,7 +28,7 @@ export module TicketService {
 
     if (!ticket.TicketID) ticket.TicketID = lastTicket.TicketID;
 
-    // TCP-SECTION
+    // TCP-SECTION -- TO BE MOVED TO TCP WITH API-PROXY
     let tcp_s = UDPAPI.USRegistry[ticket.DestinationID];
     if (tcp_s) {
       let tres = new TicketResult(true, 0, [ticket]);
